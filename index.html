@@ -1,0 +1,559 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Sebastiaan van Bergen</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<meta name="description" content="Sebastiaan van Bergen — Regional Partner Manager for Benelux and the Nordics at Storyblok, and founder.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,300..800&family=Figtree:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap">
+<style>
+/* Layout: one wide column; a live partner-network canvas behind the hero, then stats, about, work, journey timeline, contact. */
+:root{
+  --bg:#0D0E12; --bg-2:#15171E; --fg:#EEF0F5; --muted:#A3A9B8; --line:#262A35;
+  --signal:#8EA6FF; --spark:#FFB070;
+  --display:"Bricolage Grotesque", "Avenir Next", "Segoe UI", system-ui, sans-serif;
+  --body:"Figtree", "Helvetica Neue", "Segoe UI", system-ui, sans-serif;
+  --mono:"JetBrains Mono", ui-monospace, "SFMono-Regular", Menlo, monospace;
+  --ease:cubic-bezier(.2,.8,.2,1);
+  color-scheme:dark;
+}
+@media (prefers-color-scheme: light){:root:not([data-theme="dark"]){
+  --bg:#F4F5F8; --bg-2:#FFFFFF; --fg:#12141A; --muted:#4D5363; --line:#D9DCE4;
+  --signal:#3354D1; --spark:#B4560C; color-scheme:light;
+}}
+:root[data-theme="light"]{
+  --bg:#F4F5F8; --bg-2:#FFFFFF; --fg:#12141A; --muted:#4D5363; --line:#D9DCE4;
+  --signal:#3354D1; --spark:#B4560C; color-scheme:light;
+}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{margin:0;background:var(--bg);color:var(--fg);font-family:var(--body);font-size:17px;line-height:1.6;overflow-x:hidden;-webkit-font-smoothing:antialiased}
+a{color:inherit}
+:focus-visible{outline:2px solid var(--signal);outline-offset:3px;border-radius:6px}
+::selection{background:var(--signal);color:var(--bg)}
+.wrap{max-width:1180px;margin-inline:auto;padding-left:max(16px, env(safe-area-inset-left, 0px));padding-right:max(16px, env(safe-area-inset-right, 0px))}
+@media (min-width:700px){.wrap{padding-left:max(40px, env(safe-area-inset-left, 0px));padding-right:max(40px, env(safe-area-inset-right, 0px))}}
+h1,h2,h3{font-family:var(--display);text-wrap:balance;margin:0;font-weight:600;letter-spacing:-.025em}
+p{margin:0}
+.label{font-family:var(--mono);font-size:12.5px;letter-spacing:.12em;text-transform:uppercase;color:var(--muted)}
+.label b{color:var(--spark);font-weight:500}
+
+/* nav */
+body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset-top, 0px);z-index:60;background:var(--bg)}
+.nav{position:fixed;top:env(safe-area-inset-top, 0px);left:0;right:0;z-index:50;background:color-mix(in srgb, var(--bg) 72%, transparent);backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);border-bottom:1px solid color-mix(in srgb, var(--line) 70%, transparent)}
+.nav .wrap{display:flex;align-items:center;justify-content:space-between;gap:12px;height:64px}
+.brand{font-family:var(--display);font-weight:700;font-size:19px;text-decoration:none;letter-spacing:-.02em;display:flex;align-items:center;gap:10px}
+.brand i{width:10px;height:10px;border-radius:50%;background:var(--spark);box-shadow:0 0 0 4px color-mix(in srgb, var(--spark) 25%, transparent);animation:beat 2.4s var(--ease) infinite}
+@keyframes beat{50%{box-shadow:0 0 0 8px color-mix(in srgb, var(--spark) 0%, transparent)}}
+.nav nav{display:flex;gap:2px}
+.nav nav a{text-decoration:none;font-size:15px;padding:10px 12px;border-radius:999px;color:var(--muted);transition:color .2s,background .2s}
+.nav nav a:hover{color:var(--fg);background:var(--bg-2)}
+.short{display:none}
+@media (max-width:560px){.full{display:none}.short{display:inline}.nav nav a{padding:10px 9px;font-size:14px}.nav nav a.opt{display:none}}
+.progress{position:absolute;left:0;bottom:-1px;height:2px;width:100%;transform-origin:0 50%;transform:scaleX(0);background:linear-gradient(90deg,var(--signal),var(--spark))}
+
+/* hero */
+.hero{position:relative;overflow:hidden;padding-top:calc(64px + env(safe-area-inset-top, 0px))}
+#net{position:absolute;inset:0;width:100%;height:100%;display:block}
+.hero::after{content:"";position:absolute;inset:auto 0 0;height:140px;background:linear-gradient(to bottom,transparent,var(--bg));pointer-events:none}
+.hero .wrap{position:relative;z-index:2;padding-block:clamp(88px,14vw,170px) clamp(96px,12vw,150px);pointer-events:none}
+.hero .wrap a{pointer-events:auto}
+.hero h1{font-size:clamp(44px,7.6vw,104px);line-height:.98;font-weight:650;max-width:15ch;margin-block:22px 28px}
+.w{display:inline-block;overflow:hidden;vertical-align:top;padding-bottom:.08em;margin-bottom:-.08em}
+.w>span{display:inline-block;animation:rise 1s var(--ease) both;animation-delay:calc(var(--i) * 55ms + 150ms)}
+@keyframes rise{from{transform:translateY(105%)}}
+.rot{display:block;position:relative;height:1.06em;overflow:hidden;color:var(--spark)}
+.rot span{position:absolute;left:0;top:0;white-space:nowrap;transition:transform .7s var(--ease),opacity .7s var(--ease)}
+.rot span.out{transform:translateY(-100%);opacity:0}
+.rot span.wait{transform:translateY(100%);opacity:0}
+.lede{max-width:56ch;font-size:clamp(17px,1.6vw,20px);color:var(--muted);animation:fade 1.2s .7s var(--ease) both}
+.lede strong{color:var(--fg);font-weight:500}
+@keyframes fade{from{opacity:0;transform:translateY(12px)}}
+.ctas{display:flex;flex-wrap:wrap;gap:12px;margin-top:36px;animation:fade 1.2s .9s var(--ease) both}
+.btn{display:inline-flex;align-items:center;gap:10px;min-height:52px;padding:0 26px;border-radius:999px;text-decoration:none;font-weight:600;font-size:16px;transition:transform .35s var(--ease),background .25s,border-color .25s,color .25s;will-change:transform}
+.btn.solid{background:var(--fg);color:var(--bg)}
+.btn.solid:hover{background:var(--spark);color:#121212}
+.btn.ghost{border:1px solid var(--line);background:color-mix(in srgb, var(--bg) 60%, transparent)}
+.btn.ghost:hover{border-color:var(--signal);color:var(--signal)}
+.btn svg{width:18px;height:18px;transition:transform .3s var(--ease)}
+.btn:hover svg{transform:translateX(3px)}
+.legend{position:absolute;right:max(16px, env(safe-area-inset-right, 0px));bottom:28px;z-index:3;display:flex;gap:18px;font-family:var(--mono);font-size:11.5px;color:var(--muted);letter-spacing:.06em}
+.legend span{display:flex;align-items:center;gap:7px}
+.legend i{width:8px;height:8px;border-radius:50%}
+@media (max-width:700px){.legend{display:none}}
+
+/* marquee */
+.marquee{border-block:1px solid var(--line);overflow:hidden;padding-block:22px;background:var(--bg-2)}
+.track{display:flex;width:max-content;animation:slide 38s linear infinite}
+.marquee:hover .track{animation-play-state:paused}
+.track ul{display:flex;gap:0;margin:0;padding:0;list-style:none}
+.track li{font-family:var(--display);font-size:clamp(22px,3vw,34px);font-weight:500;letter-spacing:-.02em;white-space:nowrap;display:flex;align-items:center}
+.track li::after{content:"";width:9px;height:9px;border-radius:50%;background:var(--signal);margin-inline:32px}
+.track li:nth-child(even)::after{background:var(--spark)}
+@keyframes slide{to{transform:translateX(-50%)}}
+
+/* sections */
+section.block{padding-block:clamp(88px,11vw,150px)}
+.head{display:flex;flex-wrap:wrap;align-items:end;justify-content:space-between;gap:16px 40px;margin-bottom:56px}
+.head h2{font-size:clamp(34px,4.6vw,60px);line-height:1.02;max-width:18ch}
+
+/* stats */
+.stats{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:1px;background:var(--line);border:1px solid var(--line);border-radius:22px;overflow:hidden}
+.stat{background:var(--bg);padding:30px 26px 28px;display:flex;flex-direction:column;gap:10px;min-width:0}
+.num{font-family:var(--display);font-size:clamp(52px,6vw,84px);font-weight:600;line-height:1;letter-spacing:-.04em;font-variant-numeric:tabular-nums}
+.num sup{font-size:.42em;color:var(--spark);vertical-align:top;margin-left:2px;position:relative;top:.25em}
+.stat p{color:var(--muted);font-size:15px}
+@media (max-width:820px){.stats{grid-template-columns:repeat(2,minmax(0,1fr))}}
+
+/* about */
+.about{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,2.2fr);gap:48px 72px}
+@media (max-width:860px){.about{grid-template-columns:minmax(0,1fr)}}
+.scrub{font-family:var(--display);font-size:clamp(26px,3.2vw,42px);line-height:1.22;font-weight:500;letter-spacing:-.02em}
+.scrub .sw{color:var(--muted);transition:color .4s}
+.scrub .sw.lit{color:var(--fg)}
+.about .more{margin-top:32px;color:var(--muted);max-width:60ch;font-size:18px}
+.facts{display:flex;flex-direction:column;gap:22px}
+.fact{display:flex;flex-direction:column;gap:4px;padding-bottom:20px;border-bottom:1px solid var(--line)}
+.fact strong{font-weight:500}
+
+/* work */
+.cards{display:grid;grid-template-columns:repeat(6,minmax(0,1fr));gap:20px}
+.card{grid-column:span 3;position:relative;border:1px solid var(--line);border-radius:24px;background:var(--bg-2);padding:clamp(24px,3vw,36px);display:flex;flex-direction:column;gap:18px;min-height:340px;overflow:hidden;transform:perspective(1000px) rotateX(var(--rx,0deg)) rotateY(var(--ry,0deg));transition:transform .5s var(--ease),border-color .3s;min-width:0}
+.card.big{grid-column:span 6;min-height:380px}
+.card::before{content:"";position:absolute;inset:0;background:radial-gradient(520px circle at var(--mx,50%) var(--my,0%),color-mix(in srgb, var(--signal) 18%, transparent),transparent 60%);opacity:0;transition:opacity .4s;pointer-events:none}
+.card:hover{border-color:color-mix(in srgb, var(--signal) 55%, var(--line))}
+.card:hover::before{opacity:1}
+.card>*{position:relative}
+.card .top{display:flex;justify-content:space-between;gap:16px;align-items:center}
+.card .yr{font-family:var(--mono);font-size:13px;color:var(--muted);white-space:nowrap}
+.tag{font-family:var(--mono);font-size:12px;letter-spacing:.08em;text-transform:uppercase;color:var(--spark)}
+.card h3{font-size:clamp(30px,3.6vw,52px);line-height:1;margin-top:auto}
+.card .role{color:var(--signal);font-weight:500}
+.card p.d{color:var(--muted);max-width:62ch}
+.chips{display:flex;flex-wrap:wrap;gap:8px}
+.chips span{font-size:13px;padding:6px 12px;border-radius:999px;border:1px solid var(--line);color:var(--muted)}
+.mini{position:absolute;right:-30px;top:-30px;width:260px;height:260px;opacity:.9;pointer-events:none}
+@media (max-width:820px){.card,.card.big{grid-column:span 6}.mini{width:200px;height:200px}}
+
+/* journey */
+.journey{position:relative;display:flex;flex-direction:column;gap:0;padding-left:34px}
+.journey::before{content:"";position:absolute;left:6px;top:8px;bottom:8px;width:2px;background:var(--line)}
+.journey .fill{position:absolute;left:6px;top:8px;width:2px;height:calc(100% - 16px);background:linear-gradient(var(--signal),var(--spark));transform-origin:top;transform:scaleY(var(--p,0))}
+.stop{position:relative;display:grid;grid-template-columns:110px minmax(0,1fr);gap:8px 32px;padding-block:22px;border-bottom:1px solid var(--line)}
+.stop:last-child{border-bottom:0}
+.stop::before{content:"";position:absolute;left:-34px;top:31px;width:14px;height:14px;border-radius:50%;background:var(--bg);border:2px solid var(--muted);transition:border-color .4s,background .4s,box-shadow .4s}
+.stop.on::before{border-color:var(--spark);background:var(--spark);box-shadow:0 0 0 6px color-mix(in srgb, var(--spark) 20%, transparent)}
+.stop .y{font-family:var(--mono);font-size:15px;color:var(--muted);padding-top:3px}
+.stop h3{font-size:clamp(20px,2.2vw,26px);font-weight:600;letter-spacing:-.015em}
+.stop p{color:var(--muted)}
+.stop .at{color:var(--signal);font-weight:500}
+@media (max-width:600px){.stop{grid-template-columns:minmax(0,1fr)}}
+
+/* contact */
+.contact{text-align:left;position:relative}
+.contact h2{font-size:clamp(48px,9vw,132px);line-height:.95;letter-spacing:-.045em;font-weight:700;max-width:12ch}
+.contact h2 em{font-style:normal;background:linear-gradient(90deg,var(--signal),var(--spark),var(--signal));background-size:200% 100%;-webkit-background-clip:text;background-clip:text;color:transparent;animation:shift 6s linear infinite}
+@keyframes shift{to{background-position:-200% 0}}
+.contact p.sub{margin-top:28px;color:var(--muted);font-size:19px;max-width:52ch}
+
+footer .wrap{display:flex;flex-wrap:wrap;justify-content:space-between;gap:12px;padding-block:28px;border-top:1px solid var(--line);color:var(--muted);font-size:14px}
+footer .clock{font-family:var(--mono);font-variant-numeric:tabular-nums}
+
+/* reveal */
+.js .rv{transition:opacity .9s var(--ease),transform .9s var(--ease)}
+.js .rv:not(.in){opacity:.25;transform:translateY(34px)}
+
+/* cursor glow */
+.glow{position:fixed;left:0;top:0;width:420px;height:420px;margin:-210px 0 0 -210px;border-radius:50%;pointer-events:none;z-index:1;background:radial-gradient(circle,color-mix(in srgb, var(--signal) 14%, transparent),transparent 65%);opacity:0;transition:opacity .4s}
+@media (pointer:fine){.glow.on{opacity:1}}
+
+@media (prefers-reduced-motion: reduce){
+  *,*::before,*::after{animation:none!important;transition:none!important}
+  html{scroll-behavior:auto}
+  .js .rv:not(.in){opacity:1;transform:none}
+  .glow{display:none}
+}
+</style>
+</head>
+<body>
+
+<div class="glow" aria-hidden="true"></div>
+
+<header class="nav">
+  <div class="wrap">
+    <a class="brand" href="#top"><i aria-hidden="true"></i><span class="full">Sebastiaan van Bergen</span><span class="short">SvB</span></a>
+    <nav aria-label="Main">
+      <a href="#about">About</a>
+      <a href="#work">Work</a>
+      <a class="opt" href="#journey">Journey</a>
+      <a href="#contact">Contact</a>
+    </nav>
+  </div>
+  <div class="progress" aria-hidden="true"></div>
+</header>
+
+<main id="top">
+  <section class="hero" aria-labelledby="hero-title">
+    <canvas id="net" aria-hidden="true"></canvas>
+    <div class="wrap">
+      <p class="label"><b>●</b> Regional Partner Manager · Benelux &amp; Nordics</p>
+      <h1 id="hero-title" class="split">I build partner ecosystems that drive
+        <span class="rot" aria-live="off"><span>enterprise growth.</span><span class="wait">co-selling.</span><span class="wait">partner-led pipeline.</span><span class="wait">new markets.</span></span>
+      </h1>
+      <p class="lede">I'm <strong>Sebastiaan</strong>. At <strong>Storyblok</strong> I turn agencies and technology partners into a revenue engine across the Netherlands, Belgium, Luxembourg and now the Nordics. I've also started two companies of my own.</p>
+      <div class="ctas">
+        <a class="btn solid mag" href="#work">See my work <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg></a>
+        <a class="btn ghost mag" href="https://www.linkedin.com/in/sebastiaanvanbergen/">Connect on LinkedIn</a>
+      </div>
+    </div>
+    <div class="legend" aria-hidden="true"><span><i style="background:var(--spark)"></i>Hub</span><span><i style="background:var(--signal)"></i>Partners</span><span><i style="background:var(--muted)"></i>Market</span></div>
+  </section>
+
+  <div class="marquee" aria-label="Focus areas">
+    <div class="track">
+      <ul><li>Strategic alliances</li><li>Co-selling</li><li>Go-to-market strategy</li><li>Partner enablement</li><li>Account mapping</li><li>Composable CMS</li><li>MEDDICC</li><li>Strategic communication</li></ul>
+      <ul aria-hidden="true"><li>Strategic alliances</li><li>Co-selling</li><li>Go-to-market strategy</li><li>Partner enablement</li><li>Account mapping</li><li>Composable CMS</li><li>MEDDICC</li><li>Strategic communication</li></ul>
+    </div>
+  </div>
+
+  <section class="block" aria-label="Key numbers">
+    <div class="wrap">
+      <div class="stats rv">
+        <div class="stat"><div class="num"><span data-count="15">15</span><sup>~</sup></div><p>Active partners in the Benelux ecosystem</p></div>
+        <div class="stat"><div class="num"><span data-count="5">5</span><sup>yrs</sup></div><p>Building Storyblok's partner channel</p></div>
+        <div class="stat"><div class="num"><span data-count="2">2</span></div><p>Companies founded</p></div>
+        <div class="stat"><div class="num"><span data-count="4">4</span></div><p>Languages: Dutch, English, German, French</p></div>
+      </div>
+    </div>
+  </section>
+
+  <section class="block" id="about" style="padding-top:0">
+    <div class="wrap about">
+      <div class="facts rv">
+        <p class="label">About</p>
+        <div class="fact"><span class="label">Based in</span><strong>Amsterdam, NL</strong></div>
+        <div class="fact"><span class="label">Now</span><strong>Storyblok, Benelux &amp; Nordics</strong></div>
+        <div class="fact"><span class="label">Education</span><strong>MSc with Distinction, Tilburg University</strong></div>
+        <div class="fact"><span class="label">Certified</span><strong>MEDDICC</strong></div>
+      </div>
+      <div>
+        <p class="scrub">Over five years at Storyblok I built the Benelux partner ecosystem from the ground up, from my first prospecting call to around fifteen active partners. Now I'm taking that same playbook to the Nordics.</p>
+        <p class="more rv">I like the hands-on, entrepreneurial side of partnerships: mapping accounts together, enabling partner teams and turning joint plans into pipeline. My background is in communication science and digital business, which shows in how I work: clear stories, measurable KPIs and a lot of conversations.</p>
+      </div>
+    </div>
+  </section>
+
+  <section class="block" id="work" style="padding-top:0">
+    <div class="wrap">
+      <div class="head rv">
+        <h2>Selected work</h2>
+        <p class="label">2019 — now</p>
+      </div>
+      <div class="cards">
+        <article class="card big rv">
+          <canvas class="mini" data-mini="hub" aria-hidden="true"></canvas>
+          <div class="top"><span class="tag">Partnerships</span><span class="yr">2021 — now</span></div>
+          <h3>Storyblok</h3>
+          <p class="role">Regional Partner Manager, Benelux &amp; Nordics</p>
+          <p class="d">Joined as a partner SDR, grew into partner success and then regional lead. Built the Benelux ecosystem to around 15 active agency and technology partners through enablement, account mapping and co-selling. Now expanding the model into the Nordics.</p>
+          <div class="chips"><span>Partner GTM</span><span>Co-selling</span><span>KPI frameworks</span><span>Enterprise</span></div>
+        </article>
+        <article class="card rv">
+          <div class="top"><span class="tag">Founder</span><span class="yr">2020 — now</span></div>
+          <h3>Innovative Business Card</h3>
+          <p class="d">A fully customizable digital business card that's available around the clock, so professionals never miss a chance to make an impression.</p>
+          <div class="chips"><span>Product</span><span>Digital identity</span></div>
+        </article>
+        <article class="card rv">
+          <div class="top"><span class="tag">Founder</span><span class="yr">2019 — 2020</span></div>
+          <h3>WristTrends</h3>
+          <p class="d">An e-commerce platform and blog for premium watch accessories, using machine learning for product recommendations and personalized marketing.</p>
+          <div class="chips"><span>E-commerce</span><span>Machine learning</span></div>
+        </article>
+      </div>
+    </div>
+  </section>
+
+  <section class="block" id="journey" style="padding-top:0">
+    <div class="wrap">
+      <div class="head rv">
+        <h2>The journey so far</h2>
+        <p class="label">Newest first</p>
+      </div>
+      <div class="journey">
+        <div class="fill" aria-hidden="true"></div>
+        <div class="stop"><span class="y">2026</span><div><h3>Regional Partner Manager, Benelux &amp; Nordics</h3><p><span class="at">Storyblok</span> · Taking the Benelux partner model to the Nordics.</p></div></div>
+        <div class="stop"><span class="y">2024</span><div><h3>Regional Partner Manager, Benelux</h3><p><span class="at">Storyblok</span> · Localized GTM, partner pipeline and co-selling across NL, BE and LU.</p></div></div>
+        <div class="stop"><span class="y">2022</span><div><h3>Partner Success Manager, Benelux</h3><p><span class="at">Storyblok</span> · Trusted advisor to agency and technology partners; built KPI tracking.</p></div></div>
+        <div class="stop"><span class="y">2021</span><div><h3>Partner SDR, and an MSc with Distinction</h3><p><span class="at">Storyblok · Tilburg University</span> · Started the partner pipeline while finishing Business Communication and Digital Media.</p></div></div>
+        <div class="stop"><span class="y">2020</span><div><h3>Founded Innovative Business Card</h3><p>Digital business cards for professionals.</p></div></div>
+        <div class="stop"><span class="y">2019</span><div><h3>Founded WristTrends</h3><p>Graduated in Commercial Economics, Digital Business Concepts, at <span class="at">Fontys</span>.</p></div></div>
+        <div class="stop"><span class="y">2018</span><div><h3>Online Marketeer</h3><p><span class="at">Capital Advertising</span> · Social, email and SEO campaigns; internship graded 9.0 out of 10.</p></div></div>
+      </div>
+    </div>
+  </section>
+
+  <section class="block contact" id="contact" style="padding-top:0">
+    <div class="wrap">
+      <p class="label rv" style="margin-bottom:24px">Contact</p>
+      <h2 class="rv">Let's build something <em>together.</em></h2>
+      <p class="sub rv">Always up for a conversation about strategic alliances, channel partnerships and new growth opportunities in the CMS space.</p>
+      <div class="ctas rv" style="animation:none">
+        <a class="btn solid mag" href="https://www.linkedin.com/in/sebastiaanvanbergen/">Message me on LinkedIn <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg></a>
+        <a class="btn ghost mag" href="https://github.com/svb1995">GitHub</a>
+      </div>
+    </div>
+  </section>
+</main>
+
+<footer>
+  <div class="wrap">
+    <span>© 2026 Sebastiaan van Bergen</span>
+    <span>Amsterdam · <span class="clock" id="clock">--:--</span> local time</span>
+  </div>
+</footer>
+
+<script>
+(function(){
+  document.documentElement.classList.add('js');
+  var reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  var root = document.documentElement;
+
+  // split hero words for the load-in
+  var h1 = document.querySelector('.split');
+  var i = 0;
+  Array.prototype.slice.call(h1.childNodes).forEach(function(n){
+    if(n.nodeType !== 3) return;
+    var frag = document.createDocumentFragment();
+    n.textContent.split(/(\s+)/).forEach(function(t){
+      if(!t.trim()){ frag.appendChild(document.createTextNode(t)); return; }
+      var w = document.createElement('span'); w.className = 'w';
+      var s = document.createElement('span'); s.textContent = t; s.style.setProperty('--i', i++);
+      w.appendChild(s); frag.appendChild(w);
+    });
+    h1.replaceChild(frag, n);
+  });
+
+  // rotating phrase
+  var rots = document.querySelectorAll('.rot span'), ri = 0;
+  if(!reduce) setInterval(function(){
+    var cur = rots[ri], nx = rots[(ri + 1) % rots.length];
+    cur.className = 'out';
+    nx.className = '';
+    setTimeout(function(){ cur.className = 'wait'; }, 750);
+    ri = (ri + 1) % rots.length;
+  }, 2600);
+
+  // scroll progress, scrub text, timeline
+  var bar = document.querySelector('.progress');
+  var scrub = document.querySelector('.scrub');
+  scrub.innerHTML = scrub.textContent.split(' ').map(function(w){ return '<span class="sw">' + w + '</span>'; }).join(' ');
+  var sws = scrub.querySelectorAll('.sw');
+  var journey = document.querySelector('.journey'), stops = journey.querySelectorAll('.stop');
+  function onScroll(){
+    var h = document.documentElement.scrollHeight - innerHeight;
+    bar.style.transform = 'scaleX(' + (h > 0 ? scrollY / h : 0) + ')';
+    var r = scrub.getBoundingClientRect();
+    var p = Math.min(1, Math.max(0, (innerHeight * .85 - r.top) / (r.height + innerHeight * .35)));
+    if(reduce) p = 1;
+    var lit = Math.round(p * sws.length);
+    for(var k = 0; k < sws.length; k++) sws[k].classList.toggle('lit', k < lit);
+    var jr = journey.getBoundingClientRect();
+    var jp = Math.min(1, Math.max(0, (innerHeight * .6 - jr.top) / jr.height));
+    journey.style.setProperty('--p', jp);
+    for(var s = 0; s < stops.length; s++){
+      var sr = stops[s].getBoundingClientRect();
+      stops[s].classList.toggle('on', sr.top < innerHeight * .6);
+    }
+  }
+  addEventListener('scroll', onScroll, {passive:true});
+  addEventListener('resize', onScroll);
+  onScroll();
+
+  // reveal + count-up
+  var io = new IntersectionObserver(function(es){
+    es.forEach(function(e){
+      if(!e.isIntersecting) return;
+      e.target.classList.add('in');
+      e.target.querySelectorAll('[data-count]').forEach(countUp);
+      io.unobserve(e.target);
+    });
+  }, {threshold:.12, rootMargin:'0px 0px -6% 0px'});
+  document.querySelectorAll('.rv').forEach(function(el){ io.observe(el); });
+  setTimeout(function(){ document.querySelectorAll('.rv').forEach(function(el){ el.classList.add('in'); }); }, 4000);
+  function countUp(el){
+    if(reduce) return;
+    var end = +el.dataset.count, t0 = performance.now();
+    (function tick(t){
+      var k = Math.min(1, (t - t0) / 1400), e = 1 - Math.pow(1 - k, 3);
+      el.textContent = Math.round(end * e);
+      if(k < 1) requestAnimationFrame(tick);
+    })(t0);
+  }
+
+  // card tilt + spotlight
+  var fine = window.matchMedia('(pointer:fine)').matches;
+  document.querySelectorAll('.card').forEach(function(c){
+    c.addEventListener('pointermove', function(e){
+      var r = c.getBoundingClientRect(), x = (e.clientX - r.left) / r.width, y = (e.clientY - r.top) / r.height;
+      c.style.setProperty('--mx', x * 100 + '%'); c.style.setProperty('--my', y * 100 + '%');
+      if(fine && !reduce){ c.style.setProperty('--rx', ((.5 - y) * 5) + 'deg'); c.style.setProperty('--ry', ((x - .5) * 6) + 'deg'); }
+    });
+    c.addEventListener('pointerleave', function(){ c.style.setProperty('--rx', '0deg'); c.style.setProperty('--ry', '0deg'); });
+  });
+
+  // magnetic buttons + cursor glow
+  if(fine && !reduce){
+    document.querySelectorAll('.mag').forEach(function(b){
+      b.addEventListener('pointermove', function(e){
+        var r = b.getBoundingClientRect();
+        b.style.transform = 'translate(' + (e.clientX - r.left - r.width / 2) * .22 + 'px,' + (e.clientY - r.top - r.height / 2) * .3 + 'px)';
+      });
+      b.addEventListener('pointerleave', function(){ b.style.transform = ''; });
+    });
+    var glow = document.querySelector('.glow');
+    addEventListener('pointermove', function(e){
+      glow.classList.add('on');
+      glow.style.transform = 'translate(' + e.clientX + 'px,' + e.clientY + 'px)';
+    }, {passive:true});
+    document.addEventListener('pointerleave', function(){ glow.classList.remove('on'); });
+  }
+
+  // Amsterdam clock
+  var clock = document.getElementById('clock');
+  function tickClock(){
+    try { clock.textContent = new Intl.DateTimeFormat('en-GB', {timeZone:'Europe/Amsterdam', hour:'2-digit', minute:'2-digit'}).format(new Date()); } catch(e){}
+  }
+  tickClock(); setInterval(tickClock, 20000);
+
+  // theme colors for canvases
+  var C = {};
+  function readColors(){
+    var s = getComputedStyle(root);
+    ['fg','muted','signal','spark','line'].forEach(function(k){ C[k] = s.getPropertyValue('--' + k).trim(); });
+  }
+  readColors();
+  window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', readColors);
+  new MutationObserver(readColors).observe(root, {attributes:true, attributeFilter:['data-theme']});
+
+  // hero network: a hub, ~15 partners orbiting it, and the wider market drifting around
+  var cv = document.getElementById('net'), cx = cv.getContext('2d');
+  var hero = document.querySelector('.hero');
+  var W, H, dpr, nodes = [], partners = [], hub = {}, pulses = [], mouse = {x:-1e4, y:-1e4}, visible = true, lastPulse = 0;
+  function build(){
+    var r = hero.getBoundingClientRect();
+    dpr = Math.min(2, devicePixelRatio || 1); W = r.width; H = r.height;
+    cv.width = W * dpr; cv.height = H * dpr; cx.setTransform(dpr, 0, 0, dpr, 0, 0);
+    var wide = W > 900;
+    hub = {x: wide ? W * .74 : W * .78, y: wide ? H * .46 : H * .2, r: Math.min(W, H) * (wide ? .27 : .22)};
+    partners = []; nodes = [];
+    for(var k = 0; k < 15; k++){
+      var a = k / 15 * Math.PI * 2;
+      partners.push({a:a, d:hub.r * (.7 + Math.random() * .5), s:(Math.random() * .5 + .5) * .0016 * (k % 2 ? 1 : -1), ox:0, oy:0, x:0, y:0});
+    }
+    var n = Math.max(28, Math.min(80, Math.round(W * H / 15000)));
+    for(var m = 0; m < n; m++) nodes.push({x:Math.random() * W, y:Math.random() * H, vx:(Math.random() - .5) * .3, vy:(Math.random() - .5) * .3, ox:0, oy:0});
+  }
+  function push(p){
+    var dx = p.x - mouse.x, dy = p.y - mouse.y, d = Math.sqrt(dx * dx + dy * dy);
+    if(d < 150 && d > 0){ var f = (150 - d) / 150 * 2.2; p.ox += dx / d * f; p.oy += dy / d * f; }
+    p.ox *= .9; p.oy *= .9;
+  }
+  function frame(t){
+    cx.clearRect(0, 0, W, H);
+    partners.forEach(function(p){
+      if(!reduce) p.a += p.s;
+      push(p);
+      p.x = hub.x + Math.cos(p.a) * p.d + p.ox;
+      p.y = hub.y + Math.sin(p.a) * p.d * .82 + p.oy;
+    });
+    nodes.forEach(function(p){
+      if(!reduce){ p.x += p.vx; p.y += p.vy; }
+      if(p.x < 0 || p.x > W) p.vx *= -1;
+      if(p.y < 0 || p.y > H) p.vy *= -1;
+      push(p);
+    });
+    var all = nodes.concat(partners), lim = 130;
+    cx.lineWidth = 1; cx.strokeStyle = C.muted;
+    for(var a = 0; a < all.length; a++){
+      var A = all[a], ax = A.x + (A.a === undefined ? A.ox : 0), ay = A.y + (A.a === undefined ? A.oy : 0);
+      for(var b = a + 1; b < all.length; b++){
+        var B = all[b], bx = B.x + (B.a === undefined ? B.ox : 0), by = B.y + (B.a === undefined ? B.oy : 0);
+        var dx = ax - bx, dy = ay - by, d2 = dx * dx + dy * dy;
+        if(d2 < lim * lim){
+          cx.globalAlpha = (1 - Math.sqrt(d2) / lim) * .28;
+          cx.beginPath(); cx.moveTo(ax, ay); cx.lineTo(bx, by); cx.stroke();
+        }
+      }
+    }
+    cx.strokeStyle = C.signal;
+    partners.forEach(function(p){
+      cx.globalAlpha = .42;
+      cx.beginPath(); cx.moveTo(hub.x, hub.y); cx.lineTo(p.x, p.y); cx.stroke();
+    });
+    if(!reduce && t - lastPulse > 380){
+      lastPulse = t;
+      pulses.push({p:partners[Math.floor(Math.random() * partners.length)], t:0, out:Math.random() < .5});
+    }
+    cx.fillStyle = C.spark;
+    pulses = pulses.filter(function(q){
+      q.t += .014;
+      var k = q.out ? q.t : 1 - q.t;
+      var x = hub.x + (q.p.x - hub.x) * k, y = hub.y + (q.p.y - hub.y) * k;
+      cx.globalAlpha = .18; cx.beginPath(); cx.arc(x, y, 7, 0, 7); cx.fill();
+      cx.globalAlpha = 1; cx.beginPath(); cx.arc(x, y, 2.4, 0, 7); cx.fill();
+      return q.t < 1;
+    });
+    cx.fillStyle = C.muted;
+    nodes.forEach(function(p){ cx.globalAlpha = .55; cx.beginPath(); cx.arc(p.x + p.ox, p.y + p.oy, 1.8, 0, 7); cx.fill(); });
+    cx.fillStyle = C.signal;
+    partners.forEach(function(p){ cx.globalAlpha = 1; cx.beginPath(); cx.arc(p.x, p.y, 4, 0, 7); cx.fill(); });
+    var pulse = reduce ? 0 : (Math.sin(t / 500) + 1) / 2;
+    cx.fillStyle = C.spark;
+    cx.globalAlpha = .15 + pulse * .1; cx.beginPath(); cx.arc(hub.x, hub.y, 22 + pulse * 10, 0, 7); cx.fill();
+    cx.globalAlpha = 1; cx.beginPath(); cx.arc(hub.x, hub.y, 8, 0, 7); cx.fill();
+    cx.globalAlpha = 1;
+    if(visible && !reduce) requestAnimationFrame(frame);
+  }
+  build();
+  requestAnimationFrame(frame);
+  var rs; addEventListener('resize', function(){ clearTimeout(rs); rs = setTimeout(function(){ build(); if(reduce) requestAnimationFrame(frame); }, 150); });
+  hero.addEventListener('pointermove', function(e){ var r = hero.getBoundingClientRect(); mouse.x = e.clientX - r.left; mouse.y = e.clientY - r.top; });
+  hero.addEventListener('pointerleave', function(){ mouse.x = mouse.y = -1e4; });
+  new IntersectionObserver(function(es){
+    var was = visible; visible = es[0].isIntersecting;
+    if(visible && !was && !reduce) requestAnimationFrame(frame);
+  }).observe(hero);
+
+  // small orbit drawing on the Storyblok card
+  document.querySelectorAll('[data-mini]').forEach(function(m){
+    var c = m.getContext('2d'), S = 260, a0 = 0;
+    m.width = S * dpr; m.height = S * dpr; c.setTransform(dpr, 0, 0, dpr, 0, 0);
+    var visibleMini = false;
+    new IntersectionObserver(function(es){ var was = visibleMini; visibleMini = es[0].isIntersecting; if(visibleMini && !was) requestAnimationFrame(draw); }).observe(m);
+    function draw(){
+      c.clearRect(0, 0, S, S);
+      var cxm = S / 2, cym = S / 2;
+      [44, 78, 110].forEach(function(r, ring){
+        c.globalAlpha = .35; c.strokeStyle = C.muted; c.lineWidth = 1;
+        c.beginPath(); c.arc(cxm, cym, r, 0, 7); c.stroke();
+        var count = [4, 6, 5][ring];
+        for(var k = 0; k < count; k++){
+          var a = a0 * (ring % 2 ? -1 : 1) * (1 - ring * .2) + k / count * Math.PI * 2;
+          c.globalAlpha = 1; c.fillStyle = ring === 1 ? C.spark : C.signal;
+          c.beginPath(); c.arc(cxm + Math.cos(a) * r, cym + Math.sin(a) * r, ring === 1 ? 3.5 : 3, 0, 7); c.fill();
+        }
+      });
+      c.fillStyle = C.fg; c.beginPath(); c.arc(cxm, cym, 6, 0, 7); c.fill();
+      if(!reduce) a0 += .006;
+      if(visibleMini && !reduce) requestAnimationFrame(draw);
+    }
+    requestAnimationFrame(draw);
+  });
+})();
+</script>
+</body>
+</html>
