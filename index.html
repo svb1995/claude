@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>Sebastiaan van Bergen</title>
 <meta name="claude:viewport-fit-sides" content="cover">
-<meta name="description" content="Sebastiaan van Bergen — Regional Partner Manager for Benelux and the Nordics at Storyblok, and founder.">
+<meta name="description" content="Sebastiaan van Bergen — Regional Partner Manager for Benelux and the Nordics, and founder.">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,300..800&family=Figtree:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap">
@@ -121,7 +121,7 @@ section.block{padding-block:clamp(88px,11vw,150px)}
 
 /* work */
 .cards{display:grid;grid-template-columns:repeat(6,minmax(0,1fr));gap:20px}
-.card{grid-column:span 3;position:relative;border:1px solid var(--line);border-radius:24px;background:var(--bg-2);padding:clamp(24px,3vw,36px);display:flex;flex-direction:column;gap:18px;min-height:340px;overflow:hidden;transform:perspective(1000px) rotateX(var(--rx,0deg)) rotateY(var(--ry,0deg));transition:transform .5s var(--ease),border-color .3s;min-width:0}
+.card{grid-column:span 2;position:relative;border:1px solid var(--line);border-radius:24px;background:var(--bg-2);padding:clamp(24px,3vw,36px);display:flex;flex-direction:column;gap:18px;min-height:340px;overflow:hidden;transform:perspective(1000px) rotateX(var(--rx,0deg)) rotateY(var(--ry,0deg));transition:transform .5s var(--ease),border-color .3s;min-width:0}
 .card.big{grid-column:span 6;min-height:380px}
 .card::before{content:"";position:absolute;inset:0;background:radial-gradient(520px circle at var(--mx,50%) var(--my,0%),color-mix(in srgb, var(--signal) 18%, transparent),transparent 60%);opacity:0;transition:opacity .4s;pointer-events:none}
 .card:hover{border-color:color-mix(in srgb, var(--signal) 55%, var(--line))}
@@ -130,13 +130,14 @@ section.block{padding-block:clamp(88px,11vw,150px)}
 .card .top{display:flex;justify-content:space-between;gap:16px;align-items:center}
 .card .yr{font-family:var(--mono);font-size:13px;color:var(--muted);white-space:nowrap}
 .tag{font-family:var(--mono);font-size:12px;letter-spacing:.08em;text-transform:uppercase;color:var(--spark)}
-.card h3{font-size:clamp(30px,3.6vw,52px);line-height:1;margin-top:auto}
+.card h3{font-size:clamp(28px,2.8vw,40px);line-height:1;margin-top:auto}
 .card .role{color:var(--signal);font-weight:500}
 .card p.d{color:var(--muted);max-width:62ch}
 .chips{display:flex;flex-wrap:wrap;gap:8px}
 .chips span{font-size:13px;padding:6px 12px;border-radius:999px;border:1px solid var(--line);color:var(--muted)}
-.mini{position:absolute;right:-30px;top:-30px;width:260px;height:260px;opacity:.9;pointer-events:none}
-@media (max-width:820px){.card,.card.big{grid-column:span 6}.mini{width:200px;height:200px}}
+.mini{position:absolute;right:-60px;top:-60px;width:260px;height:260px;opacity:.5;pointer-events:none}
+@media (max-width:1000px){.card{grid-column:span 3}}
+@media (max-width:700px){.card{grid-column:span 6}}
 
 /* journey */
 .journey{position:relative;display:flex;flex-direction:column;gap:0;padding-left:34px}
@@ -216,7 +217,7 @@ footer .clock{font-family:var(--mono);font-variant-numeric:tabular-nums}
       <h1 id="hero-title" class="split">I build partner ecosystems that drive
         <span class="rot" aria-live="off"><span>enterprise growth.</span><span class="wait">co-selling.</span><span class="wait">partner-led pipeline.</span><span class="wait">new markets.</span></span>
       </h1>
-      <p class="lede">I'm <strong>Sebastiaan</strong>. At <strong>Storyblok</strong> I turn agencies and technology partners into a revenue engine across the Netherlands, Belgium, Luxembourg and now the Nordics. I've also started two companies of my own.</p>
+      <p class="lede">I'm <strong>Sebastiaan</strong>. I turn agencies and technology partners into a revenue engine across the Benelux and the Nordics, and I've started two companies of my own.</p>
       <div class="ctas">
         <a class="btn solid mag" href="#work">See my work <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg></a>
         <a class="btn ghost mag" href="https://www.linkedin.com/in/sebastiaanvanbergen/">Connect on LinkedIn</a>
@@ -236,7 +237,7 @@ footer .clock{font-family:var(--mono);font-variant-numeric:tabular-nums}
     <div class="wrap">
       <div class="stats rv">
         <div class="stat"><div class="num"><span data-count="15">15</span><sup>~</sup></div><p>Active partners in the Benelux ecosystem</p></div>
-        <div class="stat"><div class="num"><span data-count="5">5</span><sup>yrs</sup></div><p>Building Storyblok's partner channel</p></div>
+        <div class="stat"><div class="num"><span data-count="5">5</span><sup>yrs</sup></div><p>Building partner channels in SaaS</p></div>
         <div class="stat"><div class="num"><span data-count="2">2</span></div><p>Companies founded</p></div>
         <div class="stat"><div class="num"><span data-count="4">4</span></div><p>Languages: Dutch, English, German, French</p></div>
       </div>
@@ -253,12 +254,12 @@ footer .clock{font-family:var(--mono);font-variant-numeric:tabular-nums}
           <figcaption class="badge"><i aria-hidden="true"></i>Open to new partnerships</figcaption>
         </figure>
         <div class="fact"><span class="label">Based in</span><strong>Amsterdam, NL</strong></div>
-        <div class="fact"><span class="label">Now</span><strong>Storyblok, Benelux &amp; Nordics</strong></div>
+        <div class="fact"><span class="label">Now</span><strong>Partnerships, Benelux &amp; Nordics</strong></div>
         <div class="fact"><span class="label">Education</span><strong>MSc with Distinction, Tilburg University</strong></div>
         <div class="fact"><span class="label">Certified</span><strong>MEDDICC</strong></div>
       </div>
       <div>
-        <p class="scrub">Over five years at Storyblok I built the Benelux partner ecosystem from the ground up, from my first prospecting call to around fifteen active partners. Now I'm taking that same playbook to the Nordics.</p>
+        <p class="scrub">I like building things from the ground up. That goes for partner ecosystems, which I've grown from a first prospecting call to around fifteen active partners, and for the companies I've started myself.</p>
         <p class="more rv">I like the hands-on, entrepreneurial side of partnerships: mapping accounts together, enabling partner teams and turning joint plans into pipeline. My background is in communication science and digital business, which shows in how I work: clear stories, measurable KPIs and a lot of conversations.</p>
       </div>
     </div>
@@ -271,14 +272,6 @@ footer .clock{font-family:var(--mono);font-variant-numeric:tabular-nums}
         <p class="label">2019 — now</p>
       </div>
       <div class="cards">
-        <article class="card big rv">
-          <canvas class="mini" data-mini="hub" aria-hidden="true"></canvas>
-          <div class="top"><span class="tag">Partnerships</span><span class="yr">2021 — now</span></div>
-          <h3>Storyblok</h3>
-          <p class="role">Regional Partner Manager, Benelux &amp; Nordics</p>
-          <p class="d">Joined as a partner SDR, grew into partner success and then regional lead. Built the Benelux ecosystem to around 15 active agency and technology partners through enablement, account mapping and co-selling. Now expanding the model into the Nordics.</p>
-          <div class="chips"><span>Partner GTM</span><span>Co-selling</span><span>KPI frameworks</span><span>Enterprise</span></div>
-        </article>
         <article class="card rv">
           <div class="top"><span class="tag">Founder</span><span class="yr">2020 — now</span></div>
           <h3>Innovative Business Card</h3>
@@ -290,6 +283,13 @@ footer .clock{font-family:var(--mono);font-variant-numeric:tabular-nums}
           <h3>WristTrends</h3>
           <p class="d">An e-commerce platform and blog for premium watch accessories, using machine learning for product recommendations and personalized marketing.</p>
           <div class="chips"><span>E-commerce</span><span>Machine learning</span></div>
+        </article>
+        <article class="card rv">
+          <canvas class="mini" data-mini="hub" aria-hidden="true"></canvas>
+          <div class="top"><span class="tag">Partnerships</span><span class="yr">2021 — now</span></div>
+          <h3>A partner ecosystem from scratch</h3>
+          <p class="d">Grew a Benelux network of around 15 agency and technology partners through enablement, account mapping and co-selling. Now taking the same approach to the Nordics.</p>
+          <div class="chips"><span>Partner GTM</span><span>Co-selling</span></div>
         </article>
       </div>
     </div>
@@ -303,10 +303,8 @@ footer .clock{font-family:var(--mono);font-variant-numeric:tabular-nums}
       </div>
       <div class="journey">
         <div class="fill" aria-hidden="true"></div>
-        <div class="stop"><span class="y">2026</span><div><h3>Regional Partner Manager, Benelux &amp; Nordics</h3><p><span class="at">Storyblok</span> · Taking the Benelux partner model to the Nordics.</p></div></div>
-        <div class="stop"><span class="y">2024</span><div><h3>Regional Partner Manager, Benelux</h3><p><span class="at">Storyblok</span> · Localized GTM, partner pipeline and co-selling across NL, BE and LU.</p></div></div>
-        <div class="stop"><span class="y">2022</span><div><h3>Partner Success Manager, Benelux</h3><p><span class="at">Storyblok</span> · Trusted advisor to agency and technology partners; built KPI tracking.</p></div></div>
-        <div class="stop"><span class="y">2021</span><div><h3>Partner SDR, and an MSc with Distinction</h3><p><span class="at">Storyblok · Tilburg University</span> · Started the partner pipeline while finishing Business Communication and Digital Media.</p></div></div>
+        <div class="stop"><span class="y">2021 — now</span><div><h3>From partner SDR to Regional Partner Manager</h3><p>Grew from prospecting new partners to leading partnerships for the Benelux and the Nordics, at <span class="at">Storyblok</span>.</p></div></div>
+        <div class="stop"><span class="y">2021</span><div><h3>MSc with Distinction</h3><p><span class="at">Tilburg University</span> · Communication and Information Sciences: Business Communication and Digital Media.</p></div></div>
         <div class="stop"><span class="y">2020</span><div><h3>Founded Innovative Business Card</h3><p>Digital business cards for professionals.</p></div></div>
         <div class="stop"><span class="y">2019</span><div><h3>Founded WristTrends</h3><p>Graduated in Commercial Economics, Digital Business Concepts, at <span class="at">Fontys</span>.</p></div></div>
         <div class="stop"><span class="y">2018</span><div><h3>Online Marketeer</h3><p><span class="at">Capital Advertising</span> · Social, email and SEO campaigns; internship graded 9.0 out of 10.</p></div></div>
@@ -318,7 +316,7 @@ footer .clock{font-family:var(--mono);font-variant-numeric:tabular-nums}
     <div class="wrap">
       <p class="label rv" style="margin-bottom:24px">Contact</p>
       <h2 class="rv">Let's build something <em>together.</em></h2>
-      <p class="sub rv">Always up for a conversation about strategic alliances, channel partnerships and new growth opportunities in the CMS space.</p>
+      <p class="sub rv">Always up for a conversation about strategic alliances, channel partnerships and new growth opportunities.</p>
       <div class="ctas rv" style="animation:none">
         <a class="btn solid mag" href="https://www.linkedin.com/in/sebastiaanvanbergen/">Message me on LinkedIn <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg></a>
         <a class="btn ghost mag" href="https://github.com/svb1995">GitHub</a>
@@ -546,7 +544,7 @@ footer .clock{font-family:var(--mono);font-variant-numeric:tabular-nums}
     if(visible && !was && !reduce) requestAnimationFrame(frame);
   }).observe(hero);
 
-  // small orbit drawing on the Storyblok card
+  // small orbit drawing on the partnerships card
   document.querySelectorAll('[data-mini]').forEach(function(m){
     var c = m.getContext('2d'), S = 260, a0 = 0;
     m.width = S * dpr; m.height = S * dpr; c.setTransform(dpr, 0, 0, dpr, 0, 0);
