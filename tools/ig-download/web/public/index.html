@@ -52,7 +52,7 @@
   <progress id="bar" value="0" max="1"></progress>
   <div id="grid"></div>
 
-  <footer>Only works for public profiles. Videos are skipped. Instagram rate-limits heavily — if it fails, wait a few minutes and try again.</footer>
+  <footer>Only works for public profiles. Videos are skipped. Grabs up to the 200 most recent posts.</footer>
 </main>
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
@@ -81,21 +81,24 @@ async function run(username) {
   $("profile").style.display = "none";
   $("bar").style.display = "none";
   try {
-    status("Looking up profile…");
-    const first = await getJSON(`/api/profile?username=${encodeURIComponent(username)}`);
-    $("pic").src = proxied(first.profilePic);
-    $("name").textContent = first.fullName || first.username;
-    $("meta").textContent = `@${first.username} · ${first.postCount} posts`;
-    $("profile").style.display = "flex";
-
-    const photos = [{ url: first.profilePic, name: "profile_picture.jpg" }, ...first.photos];
-    let cursor = first.nextCursor;
-    while (cursor) {
-      status(`Collecting posts… ${photos.length - 1} photos so far`);
-      const next = await getJSON(`/api/profile?username=${encodeURIComponent(username)}&userId=${first.userId}&cursor=${encodeURIComponent(cursor)}`);
-      photos.push(...next.photos);
-      cursor = next.nextCursor;
+    status("Starting…");
+    const { runId } = await getJSON(`/api/start?username=${encodeURIComponent(username)}`);
+    const started = Date.now();
+    let result;
+    while (true) {
+      const secs = Math.round((Date.now() - started) / 1000);
+      status(`Collecting posts from @${username}… ${secs}s (usually under a minute)`);
+      await new Promise((r) => setTimeout(r, 4000));
+      result = await getJSON(`/api/status?runId=${runId}`);
+      if (result.status === "done") break;
+      if (secs > 300) throw new Error("This is taking too long — try again in a bit.");
     }
+    const first = { username: result.username || username };
+    const photos = result.photos;
+    $("name").textContent = `@${first.username}`;
+    $("meta").textContent = `${result.postCount} posts · ${photos.length} photos`;
+    $("pic").style.display = "none";
+    $("profile").style.display = "flex";
 
     const zip = new JSZip();
     const bar = $("bar");
@@ -109,8 +112,7 @@ async function run(username) {
           const res = await fetch(proxied(p.url));
           if (!res.ok) throw new Error();
           const blob = await res.blob();
-          const date = p.takenAt ? new Date(p.takenAt * 1000).toISOString().slice(0, 10) + "_" : "";
-          zip.file(date + p.name, blob);
+          zip.file(p.name, blob);
           if ($("grid").childElementCount < 60) {
             const img = new Image(); img.src = URL.createObjectURL(blob); $("grid").append(img);
           }
