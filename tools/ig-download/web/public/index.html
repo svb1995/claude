@@ -1,0 +1,145 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Insta Photo Zipper</title>
+<style>
+  :root {
+    --bg: #faf8f5; --card: #ffffff; --text: #1d1b19; --muted: #6f6a64;
+    --line: #e7e2dc; --accent: #d6336c; --accent-2: #f59f00; --err: #c92a2a;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root { --bg: #141312; --card: #1e1c1b; --text: #f2efeb; --muted: #a29b93; --line: #34302d; --err: #ff6b6b; }
+  }
+  * { box-sizing: border-box; }
+  body { margin: 0; background: var(--bg); color: var(--text); font: 16px/1.5 system-ui, -apple-system, "Segoe UI", sans-serif; }
+  main { max-width: 640px; margin: 0 auto; padding: 56px 16px; }
+  h1 { font-size: 2rem; margin: 0 0 4px; letter-spacing: -0.02em; }
+  h1 span { background: linear-gradient(90deg, var(--accent-2), var(--accent)); -webkit-background-clip: text; background-clip: text; color: transparent; }
+  p.lead { color: var(--muted); margin: 0 0 28px; }
+  form { display: flex; gap: 8px; }
+  .field { flex: 1; display: flex; align-items: center; background: var(--card); border: 1px solid var(--line); border-radius: 12px; padding: 0 12px; }
+  .field span { color: var(--muted); }
+  input { flex: 1; min-width: 0; border: 0; background: transparent; color: inherit; font: inherit; padding: 12px 4px; outline: none; }
+  .field:focus-within { border-color: var(--accent); }
+  button { border: 0; border-radius: 12px; padding: 0 20px; font: inherit; font-weight: 600; color: #fff; background: linear-gradient(90deg, var(--accent-2), var(--accent)); cursor: pointer; }
+  button:disabled { opacity: .5; cursor: default; }
+  #status { margin-top: 24px; min-height: 1.5em; color: var(--muted); }
+  #status.err { color: var(--err); }
+  progress { width: 100%; height: 8px; margin-top: 8px; accent-color: var(--accent); display: none; }
+  .profile { display: none; align-items: center; gap: 12px; margin-top: 24px; padding: 12px; background: var(--card); border: 1px solid var(--line); border-radius: 12px; }
+  .profile img { width: 48px; height: 48px; border-radius: 50%; object-fit: cover; }
+  .profile b { display: block; }
+  .profile small { color: var(--muted); }
+  #grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(90px, 1fr)); gap: 4px; margin-top: 16px; }
+  #grid img { width: 100%; aspect-ratio: 1; object-fit: cover; border-radius: 4px; }
+  footer { margin-top: 40px; color: var(--muted); font-size: .85rem; }
+</style>
+</head>
+<body>
+<main>
+  <h1>Insta <span>Photo Zipper</span></h1>
+  <p class="lead">Download every photo from a public Instagram profile as a single zip.</p>
+
+  <form id="form">
+    <label class="field"><span>@</span><input id="username" placeholder="username" autocomplete="off" autocapitalize="off" spellcheck="false" required></label>
+    <button id="go">Download</button>
+  </form>
+
+  <div class="profile" id="profile"><img id="pic" alt=""><div><b id="name"></b><small id="meta"></small></div></div>
+  <div id="status"></div>
+  <progress id="bar" value="0" max="1"></progress>
+  <div id="grid"></div>
+
+  <footer>Only works for public profiles. Videos are skipped. Instagram rate-limits heavily — if it fails, wait a few minutes and try again.</footer>
+</main>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+<script>
+const $ = (id) => document.getElementById(id);
+const params = new URLSearchParams(location.search);
+if (params.get("u")) $("username").value = params.get("u");
+
+function status(msg, isErr = false) {
+  $("status").textContent = msg;
+  $("status").classList.toggle("err", isErr);
+}
+
+async function getJSON(url) {
+  const res = await fetch(url);
+  const data = await res.json().catch(() => ({}));
+  if (!res.ok) throw new Error(data.error || `Request failed (${res.status})`);
+  return data;
+}
+
+const proxied = (url) => `/api/image?url=${encodeURIComponent(url)}`;
+
+async function run(username) {
+  $("go").disabled = true;
+  $("grid").innerHTML = "";
+  $("profile").style.display = "none";
+  $("bar").style.display = "none";
+  try {
+    status("Looking up profile…");
+    const first = await getJSON(`/api/profile?username=${encodeURIComponent(username)}`);
+    $("pic").src = proxied(first.profilePic);
+    $("name").textContent = first.fullName || first.username;
+    $("meta").textContent = `@${first.username} · ${first.postCount} posts`;
+    $("profile").style.display = "flex";
+
+    const photos = [{ url: first.profilePic, name: "profile_picture.jpg" }, ...first.photos];
+    let cursor = first.nextCursor;
+    while (cursor) {
+      status(`Collecting posts… ${photos.length - 1} photos so far`);
+      const next = await getJSON(`/api/profile?username=${encodeURIComponent(username)}&userId=${first.userId}&cursor=${encodeURIComponent(cursor)}`);
+      photos.push(...next.photos);
+      cursor = next.nextCursor;
+    }
+
+    const zip = new JSZip();
+    const bar = $("bar");
+    bar.max = photos.length; bar.value = 0; bar.style.display = "block";
+    let done = 0, failed = 0;
+    const queue = photos.slice();
+    async function worker() {
+      while (queue.length) {
+        const p = queue.shift();
+        try {
+          const res = await fetch(proxied(p.url));
+          if (!res.ok) throw new Error();
+          const blob = await res.blob();
+          const date = p.takenAt ? new Date(p.takenAt * 1000).toISOString().slice(0, 10) + "_" : "";
+          zip.file(date + p.name, blob);
+          if ($("grid").childElementCount < 60) {
+            const img = new Image(); img.src = URL.createObjectURL(blob); $("grid").append(img);
+          }
+        } catch { failed++; }
+        bar.value = ++done;
+        status(`Downloading photos… ${done}/${photos.length}`);
+      }
+    }
+    await Promise.all(Array.from({ length: 4 }, worker));
+
+    status("Zipping…");
+    const blob = await zip.generateAsync({ type: "blob" });
+    const a = document.createElement("a");
+    a.href = URL.createObjectURL(blob);
+    a.download = `${first.username}_photos.zip`;
+    a.click();
+    status(`Done — ${done - failed} photos zipped${failed ? `, ${failed} failed` : ""}.`);
+  } catch (e) {
+    status(e.message, true);
+  } finally {
+    $("go").disabled = false;
+  }
+}
+
+$("form").addEventListener("submit", (e) => {
+  e.preventDefault();
+  const u = $("username").value.trim().replace(/^@/, "");
+  if (u) run(u);
+});
+</script>
+</body>
+</html>
