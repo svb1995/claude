@@ -1,0 +1,1293 @@
+<meta charset="utf-8">
+<title>Cryptic</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<meta name="description" content="Who's that cry? Raad elke dag de Pokémon aan zijn geluid.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Unbounded:wght@500;700;800&family=Instrument+Sans:wght@400;500;600&family=JetBrains+Mono:wght@400;500;700&display=swap">
+<style>
+/* Layout: one instrument. A sonar scanner is the hero; controls sit under it on phones and beside it on wide screens. */
+:root {
+  --bg: #080C15;
+  --bg-2: #0E1421;
+  --panel: #111929;
+  --raise: #172136;
+  --line: #24314B;
+  --line-soft: #19233A;
+  --fg: #E8EDF6;
+  --muted: #8591AB;
+  --dim: #56627C;
+  --signal: #FF5A4E;
+  --signal-ink: #1A0604;
+  --ok: #3FDC9C;
+  --warn: #FFB547;
+  --type: var(--signal);
+  --grain: .06;
+  --f-display: "Unbounded", "Arial Black", system-ui, sans-serif;
+  --f-body: "Instrument Sans", system-ui, -apple-system, "Segoe UI", sans-serif;
+  --f-mono: "JetBrains Mono", ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+  --r: 14px;
+  color-scheme: dark;
+}
+@media (prefers-color-scheme: light) {
+  :root:not([data-theme="dark"]) {
+    --bg: #EDF0F5; --bg-2: #E2E7EF; --panel: #F8FAFC; --raise: #FFFFFF;
+    --line: #C3CCDB; --line-soft: #D6DDE8; --fg: #0B1120; --muted: #525E77; --dim: #8B96AB;
+    --signal: #E0362B; --signal-ink: #FFF5F4; --ok: #0E9E64; --warn: #B86E00; --grain: .035;
+    color-scheme: light;
+  }
+}
+:root[data-theme="light"] {
+  --bg: #EDF0F5; --bg-2: #E2E7EF; --panel: #F8FAFC; --raise: #FFFFFF;
+  --line: #C3CCDB; --line-soft: #D6DDE8; --fg: #0B1120; --muted: #525E77; --dim: #8B96AB;
+  --signal: #E0362B; --signal-ink: #FFF5F4; --ok: #0E9E64; --warn: #B86E00; --grain: .035;
+  color-scheme: light;
+}
+
+* { box-sizing: border-box; }
+[hidden] { display: none !important; }
+html, body { min-height: 100%; }
+body {
+  margin: 0;
+  background: var(--bg);
+  color: var(--fg);
+  font: 15px/1.5 var(--f-body);
+  -webkit-font-smoothing: antialiased;
+  padding-left: max(16px, env(safe-area-inset-left, 0px));
+  padding-right: max(16px, env(safe-area-inset-right, 0px));
+  overflow-x: hidden;
+}
+body::before {
+  content: ""; position: fixed; inset: 0; z-index: -1; pointer-events: none;
+  background:
+    radial-gradient(60vmax 50vmax at 50% 18%, color-mix(in srgb, var(--type) 13%, transparent), transparent 70%),
+    radial-gradient(40vmax 30vmax at 90% 100%, color-mix(in srgb, var(--type) 6%, transparent), transparent 70%);
+  transition: background 1.2s ease;
+}
+body::after {
+  content: ""; position: fixed; inset: 0; z-index: 60; pointer-events: none; opacity: var(--grain);
+  background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='160' height='160'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='2' stitchTiles='stitch'/></filter><rect width='100%' height='100%' filter='url(%23n)'/></svg>");
+  mix-blend-mode: overlay;
+}
+button { font: inherit; color: inherit; cursor: pointer; }
+:focus-visible { outline: 2px solid var(--signal); outline-offset: 3px; border-radius: 8px; }
+.mono { font-family: var(--f-mono); }
+
+.app { max-width: 1040px; margin: 0 auto; padding-block: 18px 40px; display: flex; flex-direction: column; gap: 22px; }
+
+/* Header */
+.top { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
+.brand { display: flex; align-items: center; gap: 10px; min-width: 0; }
+.brand svg { flex: none; }
+.wordmark { font: 800 21px/1 var(--f-display); letter-spacing: .02em; }
+.tagline { font: 500 10.5px/1 var(--f-mono); letter-spacing: .14em; text-transform: uppercase; color: var(--muted); margin-top: 5px; }
+.icons { display: flex; gap: 6px; }
+.icon-btn {
+  width: 40px; height: 40px; display: grid; place-items: center; border-radius: 12px;
+  background: transparent; border: 1px solid var(--line-soft); color: var(--muted);
+  transition: color .2s, border-color .2s, background .2s;
+}
+.icon-btn:hover { color: var(--fg); border-color: var(--line); background: var(--panel); }
+.icon-btn:active { transform: translateY(1px); }
+
+/* Mode bar */
+.modebar { display: flex; gap: 10px; align-items: center; justify-content: space-between; flex-wrap: wrap; }
+.seg {
+  position: relative; display: grid; grid-template-columns: 1fr 1fr; padding: 4px;
+  background: var(--panel); border: 1px solid var(--line-soft); border-radius: 999px; min-width: 220px;
+}
+.seg .thumb {
+  position: absolute; top: 4px; bottom: 4px; left: 4px; width: calc(50% - 4px);
+  border-radius: 999px; background: var(--fg);
+  transition: transform .38s cubic-bezier(.3,1.4,.5,1);
+}
+.seg[data-mode="mc"] .thumb { transform: translateX(100%); }
+.seg button {
+  position: relative; z-index: 1; border: 0; background: none; padding: 8px 18px; border-radius: 999px;
+  font: 600 14px/1 var(--f-body); color: var(--muted); transition: color .25s;
+}
+.seg button[aria-selected="true"] { color: var(--bg); }
+.kind {
+  display: inline-flex; align-items: center; gap: 8px; padding: 9px 14px; border-radius: 999px;
+  border: 1px dashed var(--line); background: transparent; color: var(--muted);
+  font: 500 12px/1 var(--f-mono); letter-spacing: .08em; text-transform: uppercase;
+  transition: color .2s, border-color .2s, background .2s;
+}
+.kind:hover { color: var(--fg); border-color: var(--muted); }
+.kind[aria-pressed="true"] { border-style: solid; border-color: var(--warn); color: var(--warn); background: color-mix(in srgb, var(--warn) 9%, transparent); }
+.kind .dot { width: 7px; height: 7px; border-radius: 50%; background: currentColor; }
+
+.trainbar {
+  display: flex; flex-wrap: wrap; align-items: center; gap: 6px; padding: 10px 12px;
+  border: 1px solid color-mix(in srgb, var(--warn) 35%, var(--line-soft)); border-radius: var(--r);
+  background: color-mix(in srgb, var(--warn) 5%, var(--panel));
+}
+.trainbar .lbl { font: 500 11px/1 var(--f-mono); letter-spacing: .12em; color: var(--warn); text-transform: uppercase; margin-right: 4px; }
+.gen {
+  min-width: 36px; padding: 7px 8px; border-radius: 9px; border: 1px solid var(--line); background: var(--bg-2);
+  font: 600 12px/1 var(--f-mono); color: var(--dim); transition: all .18s;
+}
+.gen[aria-pressed="true"] { color: var(--fg); border-color: var(--warn); background: color-mix(in srgb, var(--warn) 14%, var(--bg-2)); }
+.trainbar .next { margin-left: auto; }
+
+/* Stage */
+.stage { display: grid; gap: 26px; align-items: start; }
+@media (min-width: 900px) { .stage { grid-template-columns: minmax(0, 1.05fr) minmax(0, 1fr); gap: 48px; } }
+
+.scan-col { display: flex; flex-direction: column; gap: 14px; min-width: 0; }
+.readout { display: flex; justify-content: space-between; gap: 8px; font: 500 11px/1.2 var(--f-mono); letter-spacing: .12em; text-transform: uppercase; color: var(--dim); }
+.readout b { color: var(--fg); font-weight: 700; }
+.readout .live { color: var(--signal); }
+
+.scanner {
+  position: relative; width: min(100%, 420px); aspect-ratio: 1; margin: 0 auto; max-width: 100%;
+  border-radius: 50%; isolation: isolate;
+}
+.scanner canvas { position: absolute; inset: 0; width: 100%; height: 100%; border-radius: 50%; }
+.scanner.shake { animation: shake .42s cubic-bezier(.36,.07,.19,.97); }
+@keyframes shake {
+  10%, 90% { transform: translateX(-2px); } 20%, 80% { transform: translateX(4px); }
+  30%, 50%, 70% { transform: translateX(-7px) skewX(-1deg); } 40%, 60% { transform: translateX(7px) skewX(1deg); }
+}
+.scanner.lock { animation: lock .7s cubic-bezier(.2,.9,.3,1); }
+@keyframes lock { 0% { transform: scale(1); } 30% { transform: scale(.94); } 100% { transform: scale(1); } }
+.sil, .art { position: absolute; left: 19%; top: 19%; width: 62%; height: 62%; pointer-events: none; }
+.sil {
+  background: var(--fg); opacity: 0; transition: opacity .8s ease;
+  -webkit-mask: var(--mask) center / contain no-repeat; mask: var(--mask) center / contain no-repeat;
+}
+.sil.on { opacity: .85; }
+.art { object-fit: contain; opacity: 0; clip-path: inset(100% 0 0 0); }
+.art.on { opacity: 1; clip-path: inset(0 0 0 0); transition: clip-path 1.1s cubic-bezier(.65,0,.25,1), opacity .2s; }
+.art.instant { transition: none; }
+
+.play {
+  position: absolute; left: 50%; top: 50%; width: 78px; height: 78px; margin: -39px 0 0 -39px; z-index: 3;
+  border-radius: 50%; border: 0; display: grid; place-items: center;
+  background: var(--signal); color: var(--signal-ink);
+  box-shadow: 0 0 0 8px color-mix(in srgb, var(--signal) 16%, transparent), 0 12px 32px color-mix(in srgb, var(--signal) 40%, transparent);
+  transition: transform .5s cubic-bezier(.3,1.3,.5,1), left .6s cubic-bezier(.65,0,.25,1), top .6s cubic-bezier(.65,0,.25,1), width .6s, height .6s, margin .6s, box-shadow .3s;
+}
+.play:hover { transform: scale(1.05); }
+.play:active { transform: scale(.95); }
+.play.playing { animation: pulse 1s ease-in-out infinite; }
+@keyframes pulse { 50% { box-shadow: 0 0 0 16px color-mix(in srgb, var(--signal) 8%, transparent), 0 12px 32px color-mix(in srgb, var(--signal) 40%, transparent); } }
+.play:disabled { opacity: .5; cursor: progress; }
+.scanner.revealed .play { left: 86%; top: 86%; width: 54px; height: 54px; margin: -27px 0 0 -27px; background: var(--type); box-shadow: 0 0 0 6px color-mix(in srgb, var(--type) 18%, transparent), 0 10px 26px color-mix(in srgb, var(--type) 35%, transparent); }
+.play svg { width: 34%; height: 34%; }
+
+/* Steps */
+.steps { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(6, 1fr); gap: 6px; }
+.step { display: flex; flex-direction: column; gap: 7px; min-width: 0; }
+.step .bar { position: relative; height: 6px; border-radius: 3px; background: var(--line-soft); overflow: hidden; }
+.step .bar i { position: absolute; inset: 0; transform-origin: left; transform: scaleX(0); background: var(--signal); border-radius: inherit; }
+.step .lab { font: 500 10px/1 var(--f-mono); letter-spacing: .04em; color: var(--dim); text-align: center; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.step.open .bar { background: color-mix(in srgb, var(--signal) 32%, var(--line-soft)); }
+.step.current .lab { color: var(--fg); }
+.step.current .bar { box-shadow: 0 0 0 1px var(--signal); animation: glow 1.8s ease-in-out infinite; }
+@keyframes glow { 50% { box-shadow: 0 0 0 1px var(--signal), 0 0 14px color-mix(in srgb, var(--signal) 60%, transparent); } }
+.step.miss .bar { background: color-mix(in srgb, var(--signal) 60%, var(--line-soft)); }
+.step.near .bar { background: var(--warn); }
+.step.skip .bar { background: var(--dim); }
+.step.hit .bar { background: var(--ok); }
+/* Keuze mode: dots instead of bars, so screenshots tell the modes apart */
+.mode-mc .step .bar { width: 12px; height: 12px; border-radius: 50%; margin: 0 auto; }
+
+.status { margin: 2px 0 0; min-height: 1.5em; text-align: center; color: var(--muted); font-size: 14px; text-wrap: balance; }
+.status b { color: var(--fg); font-weight: 600; }
+.hints { display: flex; gap: 6px; justify-content: center; flex-wrap: wrap; min-height: 0; }
+.chip {
+  display: inline-flex; align-items: center; gap: 6px; padding: 5px 10px 5px 8px; border-radius: 999px;
+  font: 600 11px/1 var(--f-mono); letter-spacing: .08em; text-transform: uppercase;
+  color: var(--c, var(--fg)); background: color-mix(in srgb, var(--c, var(--fg)) 13%, transparent);
+  border: 1px solid color-mix(in srgb, var(--c, var(--fg)) 35%, transparent);
+  animation: pop .45s cubic-bezier(.3,1.5,.5,1) both;
+}
+.chip::before { content: ""; width: 6px; height: 6px; border-radius: 50%; background: currentColor; }
+@keyframes pop { from { transform: scale(.6); opacity: 0; } }
+
+/* Panel */
+.panel-col { display: flex; flex-direction: column; gap: 16px; min-width: 0; }
+@media (min-width: 900px) { .panel-col { padding-top: 26px; } }
+.search { position: relative; }
+.search input {
+  width: 100%; height: 54px; padding: 0 16px 0 46px; border-radius: var(--r);
+  background: var(--panel); border: 1px solid var(--line); color: var(--fg);
+  font: 500 16px/1 var(--f-body); transition: border-color .2s, box-shadow .2s;
+}
+.search input::placeholder { color: var(--dim); }
+.search input:focus { outline: none; border-color: var(--signal); box-shadow: 0 0 0 4px color-mix(in srgb, var(--signal) 16%, transparent); }
+.search .glass { position: absolute; left: 16px; top: 17px; color: var(--dim); pointer-events: none; }
+.suggest {
+  position: absolute; left: 0; right: 0; bottom: calc(100% + 6px); z-index: 20; margin: 0; padding: 6px; list-style: none;
+  background: var(--raise); border: 1px solid var(--line); border-radius: var(--r);
+  box-shadow: 0 -18px 40px rgba(0,0,0,.28); max-height: 320px; overflow-y: auto;
+}
+@media (min-width: 900px) { .suggest { bottom: auto; top: calc(100% + 6px); box-shadow: 0 18px 40px rgba(0,0,0,.28); } }
+.suggest li { display: flex; align-items: center; gap: 10px; padding: 4px 10px 4px 4px; border-radius: 10px; cursor: pointer; }
+.suggest li[aria-selected="true"] { background: color-mix(in srgb, var(--signal) 14%, transparent); }
+.suggest li .nm { flex: 1; font-weight: 500; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.suggest li .nm mark { background: none; color: var(--signal); font-weight: 700; }
+.suggest li .no { font: 500 11px/1 var(--f-mono); color: var(--dim); }
+.suggest .empty { padding: 12px; color: var(--muted); cursor: default; }
+.sprite {
+  --s: 40px; flex: none; width: var(--s); height: var(--s);
+  background-image: url("data/minis.webp"); background-size: calc(var(--s) * 32) auto; background-repeat: no-repeat;
+  image-rendering: pixelated;
+}
+
+.actions { display: grid; grid-template-columns: 1fr 1.3fr; gap: 10px; }
+.btn {
+  height: 50px; padding: 0 18px; border-radius: var(--r); border: 1px solid var(--line);
+  background: var(--panel); color: var(--fg); font: 600 15px/1 var(--f-body);
+  display: inline-flex; align-items: center; justify-content: center; gap: 8px;
+  transition: transform .12s, background .2s, border-color .2s, opacity .2s;
+}
+.btn:hover { border-color: var(--muted); }
+.btn:active { transform: translateY(1px) scale(.99); }
+.btn:disabled { opacity: .4; cursor: not-allowed; }
+.btn small { font: 500 11px/1 var(--f-mono); color: var(--muted); letter-spacing: .04em; }
+.btn.primary { background: var(--fg); color: var(--bg); border-color: var(--fg); }
+.btn.primary:hover { background: color-mix(in srgb, var(--fg) 88%, var(--signal)); }
+.btn.signal { background: var(--signal); color: var(--signal-ink); border-color: var(--signal); }
+
+.guesses { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 6px; }
+.guess {
+  display: flex; align-items: center; gap: 10px; height: 46px; padding: 0 12px 0 6px;
+  border-radius: 12px; border: 1px dashed var(--line-soft); color: var(--dim);
+  font: 500 12px/1 var(--f-mono); letter-spacing: .08em;
+}
+.guess .n { width: 26px; text-align: center; }
+.guess .nm { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font: 600 15px/1 var(--f-body); letter-spacing: 0; }
+.guess .tag { font: 600 10px/1 var(--f-mono); letter-spacing: .1em; text-transform: uppercase; }
+.guess.filled { border-style: solid; background: var(--panel); color: var(--muted); }
+.guess.fresh { animation: slide .35s cubic-bezier(.2,.9,.3,1) both; }
+.guess.filled .nm { color: var(--fg); }
+.guess.miss { border-color: color-mix(in srgb, var(--signal) 45%, var(--line-soft)); }
+.guess.miss .tag { color: var(--signal); }
+.guess.near { border-color: color-mix(in srgb, var(--warn) 55%, var(--line-soft)); }
+.guess.near .tag { color: var(--warn); }
+.guess.skip .nm { color: var(--muted); font-style: italic; font-weight: 500; }
+.guess.hit { border-color: var(--ok); background: color-mix(in srgb, var(--ok) 10%, var(--panel)); }
+.guess.hit .tag { color: var(--ok); }
+.guess .sprite { --s: 34px; }
+@keyframes slide { from { opacity: 0; transform: translateY(-6px); } }
+
+/* Keuze cards */
+.cards { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+.card {
+  position: relative; display: flex; flex-direction: column; align-items: center; gap: 4px;
+  padding: 14px 10px 14px; border-radius: 16px; border: 1px solid var(--line); background: var(--panel);
+  text-align: center; min-width: 0; transition: transform .2s, border-color .2s, background .2s, opacity .3s;
+}
+.card:hover:not(:disabled) { border-color: var(--muted); transform: translateY(-2px); }
+.card .key { position: absolute; top: 9px; left: 11px; font: 600 10px/1 var(--f-mono); color: var(--dim); }
+.card .sprite { --s: 76px; filter: grayscale(1) contrast(1.1) brightness(.95); transition: filter .5s; }
+.card .nm { font: 600 15px/1.2 var(--f-body); max-width: 100%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.card .meta { font: 500 10px/1 var(--f-mono); color: var(--dim); letter-spacing: .1em; }
+.card.wrong { opacity: .45; border-color: color-mix(in srgb, var(--signal) 50%, var(--line)); background: color-mix(in srgb, var(--signal) 7%, var(--panel)); }
+.card.wrong.fresh { animation: flip .5s ease; }
+.card.wrong .nm { text-decoration: line-through; text-decoration-color: var(--signal); }
+.card.right { border-color: var(--ok); background: color-mix(in srgb, var(--ok) 12%, var(--panel)); }
+.card.right .sprite, .done .card .sprite { filter: none; }
+.card:disabled { cursor: default; }
+@keyframes flip { 30% { transform: rotateY(18deg) scale(.97); } 60% { transform: rotateY(-10deg); } }
+.more { width: 100%; }
+
+/* Result */
+.result {
+  position: relative; padding: 22px; border-radius: 20px; border: 1px solid var(--line);
+  background: linear-gradient(160deg, color-mix(in srgb, var(--type) 12%, var(--panel)), var(--panel) 60%);
+  display: flex; flex-direction: column; gap: 14px; overflow: hidden;
+}
+.result .eyebrow { font: 600 11px/1 var(--f-mono); letter-spacing: .14em; text-transform: uppercase; color: var(--type); }
+.result h2 { margin: 0; font: 800 clamp(30px, 8vw, 46px)/1 var(--f-display); letter-spacing: -.01em; text-wrap: balance; overflow-wrap: anywhere; }
+.result h2 span { display: inline-block; animation: rise .5s cubic-bezier(.2,.9,.3,1.2) both; }
+@keyframes rise { from { opacity: 0; transform: translateY(.4em) rotate(4deg); } }
+.result .facts { display: flex; flex-wrap: wrap; gap: 6px; align-items: center; }
+.result .dexno { font: 600 12px/1 var(--f-mono); color: var(--muted); letter-spacing: .1em; margin-right: 6px; }
+.result .row { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+.result .next-in { display: flex; justify-content: space-between; align-items: center; padding-top: 12px; border-top: 1px solid var(--line-soft); font: 500 11px/1 var(--f-mono); letter-spacing: .12em; color: var(--dim); text-transform: uppercase; }
+.result .next-in b { font: 700 18px/1 var(--f-mono); color: var(--fg); letter-spacing: .04em; font-variant-numeric: tabular-nums; }
+
+.toast {
+  position: fixed; left: 50%; bottom: calc(24px + env(safe-area-inset-bottom, 0px)); z-index: 70;
+  transform: translate(-50%, 20px); opacity: 0; pointer-events: none;
+  padding: 11px 16px; border-radius: 12px; background: var(--fg); color: var(--bg); font-weight: 600; font-size: 14px;
+  transition: opacity .25s, transform .25s;
+}
+.toast.on { opacity: 1; transform: translate(-50%, 0); }
+
+footer { margin-top: 10px; padding-top: 18px; border-top: 1px solid var(--line-soft); display: flex; flex-wrap: wrap; gap: 6px 16px; justify-content: space-between; font: 400 11px/1.5 var(--f-mono); color: var(--dim); }
+footer a { color: var(--muted); }
+
+/* Dialogs */
+dialog {
+  width: min(460px, calc(100vw - 32px)); max-height: calc(100dvh - 48px); padding: 0; border-radius: 22px;
+  border: 1px solid var(--line); background: var(--raise); color: var(--fg); overflow: auto;
+}
+dialog::backdrop { background: color-mix(in srgb, var(--bg) 70%, transparent); backdrop-filter: blur(6px); }
+dialog[open] { animation: dlg .35s cubic-bezier(.2,.9,.3,1.1); }
+@keyframes dlg { from { opacity: 0; transform: translateY(14px) scale(.97); } }
+.dlg { padding: 24px; display: flex; flex-direction: column; gap: 18px; }
+.dlg-head { display: flex; justify-content: space-between; align-items: center; gap: 12px; }
+.dlg h3 { margin: 0; font: 700 18px/1.2 var(--f-display); }
+.how { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 14px; }
+.how li { display: grid; grid-template-columns: 44px 1fr; gap: 12px; align-items: start; }
+.how .ic { width: 44px; height: 44px; border-radius: 12px; display: grid; place-items: center; background: color-mix(in srgb, var(--signal) 13%, transparent); color: var(--signal); }
+.how b { display: block; font-weight: 600; }
+.how span { color: var(--muted); font-size: 14px; }
+.legend { display: flex; flex-wrap: wrap; gap: 8px 14px; padding: 12px 14px; border-radius: 12px; background: var(--bg-2); font-size: 13px; color: var(--muted); }
+.legend i { display: inline-block; width: 10px; height: 10px; border-radius: 3px; margin-right: 6px; vertical-align: -1px; }
+
+.tabs { display: flex; gap: 4px; padding: 4px; border-radius: 12px; background: var(--bg-2); }
+.tabs button { flex: 1; padding: 8px; border: 0; border-radius: 9px; background: none; color: var(--muted); font-weight: 600; }
+.tabs button[aria-selected="true"] { background: var(--raise); color: var(--fg); box-shadow: 0 1px 0 var(--line); }
+.nums { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; }
+.nums div { display: flex; flex-direction: column; gap: 6px; padding: 12px 6px; border-radius: 12px; background: var(--bg-2); text-align: center; }
+.nums b { font: 700 24px/1 var(--f-display); font-variant-numeric: tabular-nums; }
+.nums span { font: 500 9.5px/1.2 var(--f-mono); letter-spacing: .1em; color: var(--muted); text-transform: uppercase; }
+.dist { display: flex; flex-direction: column; gap: 6px; }
+.dist .r { display: grid; grid-template-columns: 18px 1fr; gap: 8px; align-items: center; font: 600 12px/1 var(--f-mono); color: var(--muted); }
+.dist .b { height: 22px; min-width: 26px; border-radius: 6px; background: var(--line); color: var(--fg); display: flex; align-items: center; justify-content: flex-end; padding: 0 8px; font: 700 12px/1 var(--f-mono); transition: width .6s cubic-bezier(.2,.9,.3,1); }
+.dist .b.today { background: var(--signal); color: var(--signal-ink); }
+.muted { color: var(--muted); font-size: 13px; margin: 0; }
+.share-img { width: 100%; border-radius: 14px; border: 1px solid var(--line); display: block; background: var(--bg); }
+.share-text { margin: 0; padding: 12px 14px; border-radius: 12px; background: var(--bg-2); font: 500 13px/1.6 var(--f-mono); white-space: pre-wrap; user-select: all; }
+
+#fx { position: fixed; inset: 0; width: 100%; height: 100%; pointer-events: none; z-index: 55; }
+.sr { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
+
+@media (max-width: 420px) {
+  .step .lab { font-size: 9px; letter-spacing: 0; }
+  .actions { grid-template-columns: 1fr 1fr; }
+  .nums b { font-size: 20px; }
+}
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { animation-duration: .01ms !important; animation-iteration-count: 1 !important; transition-duration: .2s !important; }
+  .art.on { clip-path: inset(0 0 0 0); }
+}
+</style>
+
+<div class="app" id="app">
+  <header class="top">
+    <div class="brand">
+      <svg width="34" height="34" viewBox="0 0 34 34" aria-hidden="true">
+        <circle cx="17" cy="17" r="15.5" fill="none" stroke="var(--line)" stroke-width="1.5"/>
+        <circle cx="17" cy="17" r="9.5" fill="none" stroke="var(--line)" stroke-width="1.5"/>
+        <path d="M17 17 L17 1.5 A15.5 15.5 0 0 1 31.2 10.8 Z" fill="var(--signal)" opacity=".85"/>
+        <circle cx="17" cy="17" r="3" fill="var(--fg)"/>
+      </svg>
+      <div>
+        <div class="wordmark">CRYPTIC</div>
+        <div class="tagline">Who's that cry?</div>
+      </div>
+    </div>
+    <nav class="icons">
+      <button class="icon-btn" id="btnHelp" aria-label="Uitleg">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="9.5"/><path d="M9.5 9.3a2.6 2.6 0 0 1 5 .9c0 1.8-2.5 2.3-2.5 3.8"/><circle cx="12" cy="17.2" r=".6" fill="currentColor"/></svg>
+      </button>
+      <button class="icon-btn" id="btnStats" aria-label="Statistieken">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M5 20V12M12 20V5M19 20v-6"/></svg>
+      </button>
+    </nav>
+  </header>
+
+  <div class="modebar">
+    <div class="seg" id="seg" role="tablist" aria-label="Speelmodus" data-mode="open">
+      <span class="thumb"></span>
+      <button role="tab" id="tabOpen" data-mode="open" aria-selected="true">Open</button>
+      <button role="tab" id="tabMc" data-mode="mc" aria-selected="false">Keuze</button>
+    </div>
+    <button class="kind" id="btnKind" aria-pressed="false"><span class="dot"></span><span id="kindLabel">Training</span></button>
+  </div>
+
+  <div class="trainbar" id="trainbar" hidden>
+    <span class="lbl">Generaties</span>
+    <span id="gens" style="display:contents"></span>
+    <button class="btn next" id="btnNext" style="height:36px;padding:0 14px;font-size:13px">Volgende</button>
+  </div>
+
+  <main class="stage" id="stage">
+    <section class="scan-col" aria-label="Scanner">
+      <div class="readout"><span>Signaal <b id="roSignal">01</b>/06</span><span id="roMode">Mode: Expert</span></div>
+      <div class="scanner" id="scanner">
+        <canvas id="scan"></canvas>
+        <div class="sil" id="sil"></div>
+        <img class="art" id="art" alt="">
+        <button class="play" id="btnPlay" aria-label="Speel fragment af" disabled>
+          <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M7 4.5v15a1 1 0 0 0 1.5.86l12.4-7.5a1 1 0 0 0 0-1.72L8.5 3.64A1 1 0 0 0 7 4.5z"/></svg>
+        </button>
+      </div>
+      <div class="readout"><span id="roDex" class="live">● Booting</span><span id="roDate"></span></div>
+      <ol class="steps" id="steps"></ol>
+      <p class="status" id="status" aria-live="polite"></p>
+      <div class="hints" id="hints"></div>
+    </section>
+
+    <section class="panel-col" id="panel">
+      <div id="result" class="result" hidden>
+        <div class="eyebrow" id="resEyebrow"></div>
+        <h2 id="resName"></h2>
+        <div class="facts" id="resFacts"></div>
+        <div class="row">
+          <button class="btn primary" id="btnShare">Deel score</button>
+          <button class="btn" id="btnCard">Deelkaart</button>
+        </div>
+        <button class="btn signal" id="btnAgain" hidden>Volgende Pokémon</button>
+        <div class="next-in" id="nextIn"><span>Volgende cry over</span><b id="countdown">--:--:--</b></div>
+      </div>
+
+      <div id="openPanel">
+        <div style="display:flex;flex-direction:column;gap:12px">
+          <div class="search" id="searchWrap">
+            <svg class="glass" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><path d="m20 20-4-4"/></svg>
+            <input id="guessInput" type="text" autocomplete="off" spellcheck="false" placeholder="Welke Pokémon is dit?"
+              role="combobox" aria-expanded="false" aria-controls="suggest" aria-autocomplete="list" aria-label="Typ een Pokémon">
+            <ul class="suggest" id="suggest" role="listbox" hidden></ul>
+          </div>
+          <div class="actions" id="openActions">
+            <button class="btn" id="btnSkip">Overslaan <small id="skipHint"></small></button>
+            <button class="btn primary" id="btnGuess" disabled>Raden</button>
+          </div>
+        </div>
+      </div>
+
+      <div id="mcPanel" hidden>
+        <div style="display:flex;flex-direction:column;gap:12px">
+          <div class="cards" id="cards"></div>
+          <button class="btn more" id="btnMore">Langer luisteren <small id="moreHint"></small></button>
+        </div>
+      </div>
+
+      <ol class="guesses" id="guessList" aria-label="Je pogingen"></ol>
+    </section>
+  </main>
+
+  <footer>
+    <span>Fan-project. Pokémon © Nintendo / Game Freak / The Pokémon Company.</span>
+    <span>Data &amp; cries via <a href="https://pokeapi.co" target="_blank" rel="noopener">PokéAPI</a></span>
+  </footer>
+</div>
+
+<dialog id="dlgHelp" aria-labelledby="helpTitle">
+  <div class="dlg">
+    <div class="dlg-head"><h3 id="helpTitle">Who's that cry?</h3><button class="icon-btn" data-close aria-label="Sluiten">✕</button></div>
+    <ul class="how">
+      <li><div class="ic"><svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M7 4.5v15a1 1 0 0 0 1.5.86l12.4-7.5a1 1 0 0 0 0-1.72L8.5 3.64A1 1 0 0 0 7 4.5z"/></svg></div>
+        <div><b>Luister</b><span>Je hoort eerst 0,1 seconde van de cry van een Pokémon.</span></div></li>
+      <li><div class="ic"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><path d="m20 20-4-4"/></svg></div>
+        <div><b>Raad</b><span><b style="display:inline">Open</b>: typ zelf de naam. <b style="display:inline">Keuze</b>: kies uit vier.</span></div></li>
+      <li><div class="ic"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M3 12h2M7 8v8M11 5v14M15 8v8M19 10v4"/></svg></div>
+        <div><b>Hoor meer</b><span>Elke fout of overslag laat meer horen. In Open krijg je bij stap 5 en 6 ook het type, de generatie en een silhouet.</span></div></li>
+    </ul>
+    <div class="legend">
+      <span><i style="background:var(--ok)"></i>Goed</span>
+      <span><i style="background:var(--warn)"></i>Fout, wel zelfde type</span>
+      <span><i style="background:var(--signal)"></i>Fout</span>
+      <span><i style="background:var(--dim)"></i>Overgeslagen</span>
+    </div>
+    <p class="muted">Elke dag om middernacht een nieuwe Pokémon, voor iedereen dezelfde. Open en Keuze tellen apart. Training telt niet mee.</p>
+    <button class="btn primary" data-close>Start de scanner</button>
+  </div>
+</dialog>
+
+<dialog id="dlgStats" aria-labelledby="statsTitle">
+  <div class="dlg">
+    <div class="dlg-head"><h3 id="statsTitle">Statistieken</h3><button class="icon-btn" data-close aria-label="Sluiten">✕</button></div>
+    <div class="tabs" role="tablist" id="statTabs">
+      <button role="tab" data-mode="open" aria-selected="true">Open</button>
+      <button role="tab" data-mode="mc" aria-selected="false">Keuze</button>
+    </div>
+    <div class="nums" id="statNums"></div>
+    <div class="dist" id="statDist"></div>
+    <p class="muted" id="statNote"></p>
+  </div>
+</dialog>
+
+<dialog id="dlgShare" aria-labelledby="shareTitle">
+  <div class="dlg">
+    <div class="dlg-head"><h3 id="shareTitle">Deelkaart</h3><button class="icon-btn" data-close aria-label="Sluiten">✕</button></div>
+    <img class="share-img" id="shareImg" alt="Deelkaart met je score en de golfvorm van de cry">
+    <p class="muted">Houd de kaart ingedrukt (mobiel) of klik met rechts (desktop) om hem op te slaan. De Pokémon zelf staat er niet op.</p>
+    <pre class="share-text" id="shareText"></pre>
+    <button class="btn primary" id="btnCopy2">Kopieer tekst</button>
+  </div>
+</dialog>
+
+<div class="toast" id="toast" role="status"></div>
+<canvas id="fx" aria-hidden="true"></canvas>
+
+<script>
+(() => {
+  "use strict";
+  const $ = (id) => document.getElementById(id);
+  const PACK = 64, MAX_ID = 1025, STEPS = 6;
+  const LAUNCH = [2026, 9, 23]; // puzzle #1 = 23 Oct 2026
+  const CUT = [0.1, 0.25, 0.5, Infinity, Infinity, Infinity];
+  const LABELS = {
+    open: ["0,1 s", "0,25 s", "0,5 s", "Volledig", "+Type", "+Gen"],
+    mc:   ["0,1 s", "0,25 s", "0,5 s", "Volledig", "Volledig", "8-bit"],
+  };
+  const TYPES = {
+    normal: ["Normaal", "#A9A47E"], fire: ["Vuur", "#FF8A3D"], water: ["Water", "#3DA5F4"], grass: ["Gras", "#46C774"],
+    electric: ["Elektrisch", "#F2C424"], ice: ["IJs", "#6FD6DE"], fighting: ["Vechten", "#E2533F"], poison: ["Gif", "#B05FD8"],
+    ground: ["Grond", "#D49A50"], flying: ["Vliegend", "#8C9EFF"], psychic: ["Psychisch", "#FF5C93"], bug: ["Insect", "#9DBA22"],
+    rock: ["Steen", "#BFA145"], ghost: ["Geest", "#8A76DA"], dragon: ["Draak", "#6F5BFF"], dark: ["Duister", "#9A8677"],
+    steel: ["Staal", "#93ACC2"], fairy: ["Fee", "#F190D0"],
+  };
+  const ROMAN = ["", "I", "II", "III", "IV", "V", "VI", "VII", "VIII", "IX"];
+  const MONTHS = ["jan", "feb", "mrt", "apr", "mei", "jun", "jul", "aug", "sep", "okt", "nov", "dec"];
+  const reduced = matchMedia("(prefers-reduced-motion: reduce)").matches;
+
+  /* ---------- storage ---------- */
+  const store = {
+    get(k, d) { try { const v = localStorage.getItem("cryptic:" + k); return v == null ? d : JSON.parse(v); } catch { return d; } },
+    set(k, v) { try { localStorage.setItem("cryptic:" + k, JSON.stringify(v)); } catch {} },
+  };
+
+  /* ---------- seeded randomness ---------- */
+  function rng(seed) {
+    let a = seed >>> 0;
+    return () => { a = (a + 0x6D2B79F5) >>> 0; let t = a; t = Math.imul(t ^ (t >>> 15), t | 1); t ^= t + Math.imul(t ^ (t >>> 7), t | 61); return ((t ^ (t >>> 14)) >>> 0) / 4294967296; };
+  }
+  function shuffle(arr, r) { for (let i = arr.length - 1; i > 0; i--) { const j = Math.floor(r() * (i + 1)); [arr[i], arr[j]] = [arr[j], arr[i]]; } return arr; }
+
+  /* ---------- dates ---------- */
+  function dayNumber(d = new Date()) {
+    return Math.floor((Date.UTC(d.getFullYear(), d.getMonth(), d.getDate()) - Date.UTC(...LAUNCH)) / 864e5) + 1;
+  }
+  const ORDER = shuffle(Array.from({ length: MAX_ID }, (_, i) => i + 1), rng(0xC0FFEE));
+  const dailyId = (day) => ORDER[((day - 1) % MAX_ID + MAX_ID) % MAX_ID];
+
+  /* ---------- data ---------- */
+  let DEX = [];
+  const packs = new Map();
+  const norm = (s) => s.normalize("NFD").replace(/[̀-ͯ]/g, "").toLowerCase().replace(/♀/g, "f").replace(/♂/g, "m").replace(/[^a-z0-9]/g, "");
+  const P = (id) => ({ id, name: DEX[id - 1][0], gen: DEX[id - 1][1], types: DEX[id - 1][2] });
+  function loadPack(id) {
+    const k = Math.floor((id - 1) / PACK);
+    if (!packs.has(k)) packs.set(k, fetch(`data/pack-${k}.json`).then((r) => { if (!r.ok) throw new Error(r.status); return r.json(); }));
+    return packs.get(k).then((p) => p[id]);
+  }
+  function spriteStyle(el, id) {
+    const i = id - 1;
+    el.style.backgroundPosition = `calc(var(--s) * ${-(i % 32)}) calc(var(--s) * ${-Math.floor(i / 32)})`;
+  }
+
+  /* ---------- audio ---------- */
+  const AC = window.AudioContext || window.webkitAudioContext;
+  const actx = new AC();
+  const analyser = actx.createAnalyser();
+  analyser.fftSize = 512; analyser.smoothingTimeConstant = 0.72;
+  analyser.connect(actx.destination);
+  let current = null; // { src, gain, until }
+
+  async function decode(b64) {
+    if (!b64) return null;
+    const bin = atob(b64), buf = new Uint8Array(bin.length);
+    for (let i = 0; i < bin.length; i++) buf[i] = bin.charCodeAt(i);
+    const audio = await actx.decodeAudioData(buf.buffer);
+    // Skip encoder padding and leading silence so 0.1 s really is 0.1 s of cry.
+    const ch = audio.getChannelData(0);
+    let i = 0; while (i < ch.length && Math.abs(ch[i]) < 0.02) i++;
+    const offset = Math.max(0, i / audio.sampleRate - 0.004);
+    let j = ch.length - 1; while (j > i && Math.abs(ch[j]) < 0.01) j--;
+    const end = Math.min(audio.duration, j / audio.sampleRate + 0.05);
+    return { audio, offset, length: Math.max(0.05, end - offset) };
+  }
+
+  function stopAudio() {
+    if (!current) return;
+    try { current.src.stop(); } catch {}
+    current = null;
+  }
+
+  function play(clip, seconds, onEnd) {
+    stopAudio();
+    const dur = Math.min(seconds, clip.length);
+    const src = actx.createBufferSource(), gain = actx.createGain();
+    src.buffer = clip.audio;
+    src.connect(gain); gain.connect(analyser);
+    const t = actx.currentTime + 0.02;
+    gain.gain.setValueAtTime(0, t);
+    gain.gain.linearRampToValueAtTime(1, t + 0.004);
+    gain.gain.setValueAtTime(1, t + Math.max(0.004, dur - 0.012));
+    gain.gain.linearRampToValueAtTime(0, t + dur);
+    src.start(t, clip.offset, dur + 0.01);
+    const me = { src, gain, until: performance.now() + (dur + 0.02) * 1000 };
+    current = me;
+    src.onended = () => { if (current === me) current = null; onEnd && onEnd(); };
+    return dur;
+  }
+
+  /* ---------- game state ---------- */
+  let mode = store.get("mode", "open");
+  let kind = "daily";
+  let gens = store.get("gens", [1, 2, 3, 4, 5, 6, 7, 8, 9]);
+  let G = null; // current game
+  let clips = { c: null, l: null };
+  let artSrc = "";
+  let busy = false;
+
+  const today = () => dayNumber();
+  const key = (m, d) => `day:${m}:${d}`;
+
+  function newGame() {
+    const day = today();
+    if (kind === "daily") {
+      const id = dailyId(day);
+      const saved = store.get(key(mode, day), null);
+      if (saved && saved.id === id) return { ...saved, kind, mode, day };
+      return { id, day, kind, mode, guesses: [], done: false, won: false, options: mode === "mc" ? options(id, rng(day * 7919 + 17)) : null };
+    }
+    const pool = DEX.map((_, i) => i + 1).filter((id) => gens.includes(DEX[id - 1][1]));
+    const id = pool[Math.floor(Math.random() * pool.length)];
+    return { id, day, kind, mode, guesses: [], done: false, won: false, options: mode === "mc" ? options(id, Math.random) : null };
+  }
+
+  function options(id, r) {
+    const a = P(id);
+    const sameGen = DEX.map((_, i) => i + 1).filter((x) => x !== id && DEX[x - 1][1] === a.gen);
+    const shared = sameGen.filter((x) => DEX[x - 1][2].some((t) => a.types.includes(t)));
+    const pick = [];
+    for (const pool of [shuffle(shared.slice(), r), shuffle(sameGen.slice(), r)]) for (const x of pool) if (pick.length < 3 && !pick.includes(x)) pick.push(x);
+    return shuffle([id, ...pick], r);
+  }
+
+  function save() {
+    if (G.kind !== "daily") return;
+    const { id, guesses, done, won, options } = G;
+    store.set(key(G.mode, G.day), { id, guesses, done, won, options });
+  }
+
+  const step = () => Math.min(G.guesses.length, STEPS - 1);
+  const clipFor = (s) => s === 5 ? (clips.l || clips.c) : clips.c;
+
+  /* ---------- rendering ---------- */
+  const el = {
+    app: $("app"), stage: $("stage"), scanner: $("scanner"), play: $("btnPlay"), sil: $("sil"), art: $("art"),
+    steps: $("steps"), status: $("status"), hints: $("hints"), roSignal: $("roSignal"), roMode: $("roMode"),
+    roDex: $("roDex"), roDate: $("roDate"), input: $("guessInput"), suggest: $("suggest"), btnGuess: $("btnGuess"),
+    btnSkip: $("btnSkip"), skipHint: $("skipHint"), guessList: $("guessList"), cards: $("cards"), btnMore: $("btnMore"),
+    moreHint: $("moreHint"), openPanel: $("openPanel"), mcPanel: $("mcPanel"), result: $("result"),
+  };
+
+  function setStatus(html) { el.status.innerHTML = html; }
+
+  function renderChrome() {
+    $("seg").dataset.mode = mode;
+    $("tabOpen").setAttribute("aria-selected", mode === "open");
+    $("tabMc").setAttribute("aria-selected", mode === "mc");
+    $("btnKind").setAttribute("aria-pressed", kind === "training");
+    $("kindLabel").textContent = kind === "training" ? "Training aan" : "Training";
+    $("trainbar").hidden = kind !== "training";
+    el.app.classList.toggle("mode-mc", mode === "mc");
+    el.roMode.textContent = mode === "open" ? "Mode: Expert" : "Mode: Assist";
+    const d = new Date();
+    el.roDate.textContent = kind === "daily" ? `#${String(G.day).padStart(3, "0")} · ${d.getDate()} ${MONTHS[d.getMonth()]}` : "Training";
+    $("gens").replaceChildren(...[1, 2, 3, 4, 5, 6, 7, 8, 9].map((g) => {
+      const b = document.createElement("button");
+      b.className = "gen"; b.textContent = ROMAN[g]; b.setAttribute("aria-pressed", gens.includes(g)); b.setAttribute("aria-label", `Generatie ${g}`);
+      b.onclick = () => {
+        const next = gens.includes(g) ? gens.filter((x) => x !== g) : [...gens, g].sort();
+        if (!next.length) return toast("Kies minstens één generatie");
+        gens = next; store.set("gens", gens); renderChrome();
+      };
+      return b;
+    }));
+  }
+
+  function renderSteps() {
+    const s = G.done ? -1 : step();
+    el.steps.replaceChildren(...LABELS[G.mode].map((lab, i) => {
+      const li = document.createElement("li");
+      li.className = "step";
+      const g = G.guesses[i];
+      if (g) li.classList.add(g.t === "skip" ? "skip" : g.ok ? "hit" : g.near ? "near" : "miss");
+      else if (i === s) li.classList.add("current", "open");
+      else if (i < s) li.classList.add("open");
+      li.innerHTML = `<div class="bar"><i></i></div><div class="lab">${lab}</div>`;
+      return li;
+    }));
+    el.roSignal.textContent = String((G.done ? G.guesses.length : s + 1)).padStart(2, "0");
+  }
+
+  function renderHints() {
+    const a = P(G.id), s = step(), chips = [];
+    const showType = G.mode === "open" && (G.done || s >= 4);
+    const showGen = G.mode === "open" && (G.done || s >= 5);
+    if (showType && !G.done) for (const t of a.types) chips.push(typeChip(t));
+    if (showGen && !G.done) chips.push(chip(`Gen ${ROMAN[a.gen]}`));
+    el.hints.replaceChildren(...chips);
+    el.sil.classList.toggle("on", showGen && !G.done);
+  }
+  function chip(text, color) { const c = document.createElement("span"); c.className = "chip"; c.textContent = text; if (color) c.style.setProperty("--c", color); return c; }
+  const typeChip = (t) => chip(TYPES[t][0], TYPES[t][1]);
+
+  function renderGuesses() {
+    if (G.mode === "mc") { el.guessList.replaceChildren(); return; }
+    el.guessList.replaceChildren(...Array.from({ length: STEPS }, (_, i) => {
+      const g = G.guesses[i], li = document.createElement("li");
+      li.className = "guess";
+      if (!g) { li.innerHTML = `<span class="n">${i + 1}</span><span class="nm"></span>`; return li; }
+      li.classList.add("filled", g.t === "skip" ? "skip" : g.ok ? "hit" : g.near ? "near" : "miss");
+      if (G.fresh && i === G.guesses.length - 1) li.classList.add("fresh");
+      if (g.t === "skip") { li.innerHTML = `<span class="n">${i + 1}</span><span class="nm">Overgeslagen</span><span class="tag">Skip</span>`; return li; }
+      const sp = document.createElement("span"); sp.className = "sprite"; spriteStyle(sp, g.id);
+      const nm = document.createElement("span"); nm.className = "nm"; nm.textContent = P(g.id).name;
+      const tag = document.createElement("span"); tag.className = "tag"; tag.textContent = g.ok ? "Goed" : g.near ? "Zelfde type" : "Fout";
+      li.append(sp, nm, tag);
+      return li;
+    }));
+  }
+
+  function renderCards() {
+    if (G.mode !== "mc") return;
+    const wrong = new Set(G.guesses.filter((g) => g.t === "guess" && !g.ok).map((g) => g.id));
+    el.cards.classList.toggle("done", G.done);
+    el.cards.replaceChildren(...G.options.map((id, i) => {
+      const b = document.createElement("button"), p = P(id);
+      b.className = "card";
+      if (wrong.has(id)) b.classList.add("wrong");
+      if (wrong.has(id) && G.fresh && G.guesses[G.guesses.length - 1].id === id) b.classList.add("fresh");
+      if (G.done && id === G.id) b.classList.add("right");
+      b.disabled = G.done || wrong.has(id);
+      b.setAttribute("aria-label", `${p.name}${wrong.has(id) ? ", fout" : ""}`);
+      const sp = document.createElement("span"); sp.className = "sprite"; spriteStyle(sp, id);
+      b.innerHTML = `<span class="key">${i + 1}</span>`;
+      const nm = document.createElement("span"); nm.className = "nm"; nm.textContent = p.name;
+      const meta = document.createElement("span"); meta.className = "meta"; meta.textContent = `#${String(id).padStart(4, "0")}`;
+      b.append(sp, nm, meta);
+      b.onclick = () => submit(id, b);
+      return b;
+    }));
+  }
+
+  function renderControls() {
+    const s = step(), last = G.guesses.length >= STEPS - 1;
+    el.openPanel.hidden = G.mode !== "open" || G.done;
+    el.mcPanel.hidden = G.mode !== "mc";
+    el.btnMore.hidden = G.done;
+    const next = LABELS[G.mode][s + 1];
+    el.skipHint.textContent = last ? "geef op" : next ? `→ ${next}` : "";
+    el.moreHint.textContent = last ? "geef op" : next ? `→ ${next}` : "";
+    el.btnSkip.firstChild.textContent = last ? "Opgeven " : "Overslaan ";
+    el.btnMore.firstChild.textContent = last ? "Opgeven " : "Langer luisteren ";
+  }
+
+  function renderAll() {
+    renderChrome(); renderSteps(); renderHints(); renderGuesses(); renderCards(); renderControls();
+    if (G.done) showResult(false); else el.result.hidden = true;
+  }
+
+  /* ---------- flow ---------- */
+  async function start() {
+    stopAudio();
+    G = newGame();
+    clips = { c: null, l: null };
+    resetReveal();
+    renderAll();
+    el.play.disabled = true;
+    el.roDex.textContent = "● Signaal zoeken";
+    el.roDex.className = "live";
+    if (!G.done) setStatus(G.guesses.length ? `Verder waar je was. Je hoort nu <b>${LABELS[G.mode][step()]}</b>.` : "Druk op play. Je hoort <b>0,1 seconde</b>.");
+    const myG = G;
+    try {
+      const entry = await loadPack(G.id);
+      const [c, l] = await Promise.all([decode(entry.c), decode(entry.l)]);
+      if (G !== myG) return;
+      clips = { c, l };
+      artSrc = "data:image/webp;base64," + entry.a;
+      el.sil.style.setProperty("--mask", `url("${artSrc}")`);
+      el.play.disabled = false;
+      if (G.done) { el.roDex.textContent = dexLabel(); reveal(false); }
+      else { el.roDex.textContent = "● Signaal ontvangen"; }
+      renderHints();
+    } catch (e) {
+      if (G !== myG) return;
+      el.roDex.textContent = "● Geen signaal";
+      setStatus("Deze browser kan het geluid niet afspelen of laden. Probeer het opnieuw in een recente Chrome, Firefox of Safari.");
+      console.error(e);
+    }
+  }
+
+  const dexLabel = () => `#${String(G.id).padStart(4, "0")} · ${P(G.id).name}`;
+
+  async function playCurrent() {
+    if (!clips.c) return;
+    if (actx.state !== "running") await actx.resume();
+    const s = G.done ? 3 : step();
+    const clip = G.done ? clips.c : clipFor(s);
+    const dur = play(clip, G.done ? Infinity : CUT[s], () => el.play.classList.remove("playing"));
+    el.play.classList.add("playing");
+    if (!G.done) {
+      const bar = el.steps.children[s]?.querySelector("i");
+      if (bar) bar.animate([{ transform: "scaleX(0)" }, { transform: "scaleX(1)" }, { transform: "scaleX(1)", opacity: 1 }, { transform: "scaleX(1)", opacity: 0 }],
+        { duration: dur * 1000 + 600, easing: "linear" });
+    }
+  }
+
+  function advance(msg) {
+    G.fresh = true;
+    G.guesses.length >= STEPS ? finish(false) : (save(), renderAll(), setStatus(msg));
+    G.fresh = false;
+  }
+
+  function submit(id, cardEl) {
+    if (G.done || busy) return;
+    const a = P(id);
+    if (G.guesses.some((g) => g.id === id)) return toast(`${a.name} heb je al geprobeerd`);
+    if (id === G.id) {
+      G.guesses.push({ t: "guess", id, ok: true });
+      return finish(true);
+    }
+    const near = P(G.id).types.some((t) => a.types.includes(t));
+    G.guesses.push({ t: "guess", id, ok: false, near: G.mode === "open" && near });
+    glitch();
+    vibrate([30, 40, 30]);
+    const s = step();
+    advance(`Niet <b>${esc(a.name)}</b>${G.mode === "open" && near ? ", maar wel hetzelfde type" : ""}. Signaal versterkt: <b>${LABELS[G.mode][s]}</b>.`);
+  }
+
+  function skip() {
+    if (G.done || busy) return;
+    G.guesses.push({ t: "skip" });
+    if (G.guesses.length >= STEPS) return finish(false);
+    advance(`Signaal versterkt: <b>${LABELS[G.mode][step()]}</b>.`);
+    playCurrent();
+  }
+
+  function finish(won) {
+    G.done = true; G.won = won; G.fresh = true;
+    save();
+    if (G.kind === "daily") {
+      const hist = store.get(`hist:${G.mode}`, {});
+      hist[G.day] = won ? G.guesses.length : 0;
+      store.set(`hist:${G.mode}`, hist);
+    }
+    el.input.value = ""; closeSuggest();
+    renderAll();
+    G.fresh = false;
+    reveal(true);
+  }
+
+  /* ---------- reveal ---------- */
+  function resetReveal() {
+    el.scanner.classList.remove("revealed", "lock");
+    el.art.classList.remove("on", "instant");
+    el.art.removeAttribute("src");
+    el.sil.classList.remove("on");
+    document.documentElement.style.removeProperty("--type");
+    scan.locked = 0;
+  }
+
+  function reveal(animated) {
+    if (!artSrc) return;
+    const a = P(G.id);
+    document.documentElement.style.setProperty("--type", TYPES[a.types[0]][1]);
+    el.roDex.textContent = dexLabel();
+    el.roDex.className = "";
+    el.art.src = artSrc;
+    el.art.alt = a.name;
+    el.sil.classList.add("on");
+    if (!animated) {
+      el.art.classList.add("instant", "on");
+      el.scanner.classList.add("revealed");
+      el.sil.classList.remove("on");
+      scan.locked = 1;
+      return;
+    }
+    el.scanner.classList.add("lock");
+    scan.flash = performance.now();
+    scan.locked = 1;
+    setTimeout(() => { el.scanner.classList.add("revealed"); el.art.classList.add("on"); }, 380);
+    setTimeout(() => el.sil.classList.remove("on"), 1300);
+    setTimeout(() => { if (clips.c) { actx.resume().then(() => { play(clips.c, Infinity, () => el.play.classList.remove("playing")); el.play.classList.add("playing"); }); } }, 650);
+    if (G.won) { setTimeout(() => burst(a.types.map((t) => TYPES[t][1])), 900); vibrate([20, 60, 40]); }
+  }
+
+  function showResult(fresh) {
+    const a = P(G.id), n = G.guesses.length;
+    el.result.hidden = false;
+    $("resEyebrow").textContent = G.won ? `Gevonden in ${n}/6${G.kind === "training" ? " · training" : ""}` : "Het signaal was";
+    const h = $("resName"); h.replaceChildren();
+    [...a.name].forEach((ch, i) => { const s = document.createElement("span"); s.textContent = ch === " " ? " " : ch; s.style.animationDelay = `${(fresh === false ? 0.45 : 0) + i * 0.035}s`; h.append(s); });
+    const facts = $("resFacts"); facts.replaceChildren();
+    const no = document.createElement("span"); no.className = "dexno"; no.textContent = `#${String(a.id).padStart(4, "0")} · GEN ${ROMAN[a.gen]}`;
+    facts.append(no, ...a.types.map(typeChip));
+    $("btnAgain").hidden = G.kind !== "training";
+    $("btnShare").hidden = $("btnCard").hidden = G.kind === "training";
+    $("nextIn").hidden = G.kind === "training";
+    setStatus(G.won ? (n === 1 ? "Op 0,1 seconde. Respect." : n <= 3 ? "Scherp gehoor." : "Gevonden.") : "Volgende keer beter. Luister nog eens naar de volledige cry.");
+  }
+
+  /* ---------- share ---------- */
+  function shareGrid() {
+    const cells = G.guesses.map((g) => g.t === "skip" ? "⚪" : g.ok ? "🟢" : g.near ? "🟠" : "🔴");
+    while (cells.length < STEPS) cells.push("⚫");
+    return cells.join("");
+  }
+  function shareText() {
+    return `Cryptic #${G.day} · ${G.mode === "open" ? "Open" : "Keuze"} · ${G.won ? G.guesses.length : "X"}/6\n${shareGrid()}\nWho's that cry?`;
+  }
+  async function copy(text) {
+    try { await navigator.clipboard.writeText(text); toast("Gekopieerd"); }
+    catch {
+      const t = document.createElement("textarea"); t.value = text; t.style.position = "fixed"; t.style.opacity = "0";
+      document.body.append(t); t.select();
+      let ok = false; try { ok = document.execCommand("copy"); } catch {}
+      t.remove(); toast(ok ? "Gekopieerd" : "Kopiëren lukt hier niet");
+    }
+  }
+
+  async function shareCard() {
+    const S = 1080, c = document.createElement("canvas"); c.width = c.height = S;
+    const x = c.getContext("2d");
+    try { await Promise.all(["800 80px Unbounded", "700 30px 'JetBrains Mono'"].map((f) => document.fonts.load(f))); } catch {}
+    const bg = "#080C15", fg = "#E8EDF6", dim = "#56627C", line = "#24314B", sig = "#FF5A4E";
+    const tc = TYPES[P(G.id).types[0]][1];
+    x.fillStyle = bg; x.fillRect(0, 0, S, S);
+    const glow = x.createRadialGradient(S / 2, S * .47, 40, S / 2, S * .47, S * .6);
+    glow.addColorStop(0, tc + "38"); glow.addColorStop(1, "transparent");
+    x.fillStyle = glow; x.fillRect(0, 0, S, S);
+    const cx = S / 2, cy = S * .47, R = 330;
+    x.strokeStyle = line; x.lineWidth = 2;
+    for (const r of [R, R * .7, R * .4]) { x.beginPath(); x.arc(cx, cy, r, 0, Math.PI * 2); x.stroke(); }
+    for (let i = 0; i < 120; i++) {
+      const a = i / 120 * Math.PI * 2, l = i % 10 === 0 ? 22 : 10;
+      x.strokeStyle = i % 10 === 0 ? sig : line;
+      x.beginPath(); x.moveTo(cx + Math.cos(a) * (R + 14), cy + Math.sin(a) * (R + 14)); x.lineTo(cx + Math.cos(a) * (R + 14 + l), cy + Math.sin(a) * (R + 14 + l)); x.stroke();
+    }
+    // radial waveform of the cry
+    const clip = clips.c, ch = clip.audio.getChannelData(0), sr = clip.audio.sampleRate;
+    const s0 = Math.floor(clip.offset * sr), s1 = Math.floor((clip.offset + clip.length) * sr), N = 180;
+    const peaks = []; let max = 0;
+    for (let i = 0; i < N; i++) {
+      let p = 0; const a = s0 + Math.floor((s1 - s0) * i / N), b = s0 + Math.floor((s1 - s0) * (i + 1) / N);
+      for (let k = a; k < b; k++) p = Math.max(p, Math.abs(ch[k] || 0));
+      peaks.push(p); max = Math.max(max, p);
+    }
+    x.lineCap = "round"; x.lineWidth = 6;
+    peaks.forEach((p, i) => {
+      const a = -Math.PI / 2 + i / N * Math.PI * 2, v = p / (max || 1);
+      const r0 = R * .46, r1 = r0 + 12 + v * R * .48;
+      x.strokeStyle = i / N <= G.guesses.length / STEPS && !G.won ? dim : sig;
+      x.globalAlpha = .35 + v * .65;
+      x.beginPath(); x.moveTo(cx + Math.cos(a) * r0, cy + Math.sin(a) * r0); x.lineTo(cx + Math.cos(a) * r1, cy + Math.sin(a) * r1); x.stroke();
+    });
+    x.globalAlpha = 1;
+    x.fillStyle = fg; x.textAlign = "center"; x.textBaseline = "middle";
+    x.font = "800 128px Unbounded, sans-serif";
+    x.fillText(`${G.won ? G.guesses.length : "X"}/6`, cx, cy + 6);
+    x.textAlign = "left"; x.textBaseline = "alphabetic";
+    x.font = "800 44px Unbounded, sans-serif"; x.fillText("CRYPTIC", 72, 112);
+    x.font = "500 24px 'JetBrains Mono', monospace"; x.fillStyle = dim; x.fillText("WHO'S THAT CRY?", 74, 152);
+    x.textAlign = "right"; x.fillStyle = fg; x.font = "700 30px 'JetBrains Mono', monospace";
+    x.fillText(`#${String(G.day).padStart(3, "0")} · ${G.mode === "open" ? "OPEN" : "KEUZE"}`, S - 72, 112);
+    const d = new Date(); x.fillStyle = dim; x.font = "500 24px 'JetBrains Mono', monospace";
+    x.fillText(`${d.getDate()} ${MONTHS[d.getMonth()].toUpperCase()} ${d.getFullYear()}`, S - 72, 152);
+    // dots
+    const cols = { skip: dim, ok: "#3FDC9C", near: "#FFB547", miss: sig, none: line };
+    const W = 62, startX = cx - (STEPS * W - 22) / 2;
+    for (let i = 0; i < STEPS; i++) {
+      const g = G.guesses[i], k = !g ? "none" : g.t === "skip" ? "skip" : g.ok ? "ok" : g.near ? "near" : "miss";
+      x.fillStyle = cols[k]; x.beginPath(); x.roundRect(startX + i * W, S - 168, 40, 40, 12); x.fill();
+    }
+    x.textAlign = "center"; x.fillStyle = dim; x.font = "500 22px 'JetBrains Mono', monospace";
+    x.fillText("SIGNAAL HERKEND IN " + (G.won ? G.guesses.length : "X") + " VAN 6 STAPPEN", cx, S - 74);
+    $("shareImg").src = c.toDataURL("image/png");
+    $("shareText").textContent = shareText();
+    openDialog("dlgShare");
+  }
+
+  /* ---------- autocomplete ---------- */
+  let matches = [], active = -1, chosen = null;
+  function search(q) {
+    const n = norm(q);
+    if (!n) return [];
+    const used = new Set(G.guesses.map((g) => g.id));
+    const starts = [], has = [];
+    DEX.forEach((d, i) => {
+      if (used.has(i + 1)) return;
+      const k = norm(d[0]);
+      if (k.startsWith(n)) starts.push(i + 1); else if (k.includes(n)) has.push(i + 1);
+    });
+    return [...starts, ...has].slice(0, 7);
+  }
+  function renderSuggest() {
+    const q = el.input.value.trim();
+    if (!q) return closeSuggest();
+    matches = search(q);
+    el.suggest.hidden = false;
+    el.input.setAttribute("aria-expanded", "true");
+    if (!matches.length) { el.suggest.innerHTML = `<li class="empty">Geen Pokémon gevonden</li>`; return; }
+    const n = norm(q);
+    el.suggest.replaceChildren(...matches.map((id, i) => {
+      const li = document.createElement("li"), name = P(id).name;
+      li.id = "opt" + id; li.setAttribute("role", "option"); li.setAttribute("aria-selected", i === active);
+      const sp = document.createElement("span"); sp.className = "sprite"; spriteStyle(sp, id);
+      const nm = document.createElement("span"); nm.className = "nm";
+      const start = norm(name).startsWith(n) ? 0 : -1;
+      if (start === 0 && name.length >= q.length && norm(name.slice(0, q.length)) === n) { const m = document.createElement("mark"); m.textContent = name.slice(0, q.length); nm.append(m, name.slice(q.length)); }
+      else nm.textContent = name;
+      const no = document.createElement("span"); no.className = "no"; no.textContent = "#" + String(id).padStart(4, "0");
+      li.append(sp, nm, no);
+      li.onpointerdown = (e) => { e.preventDefault(); pick(id); };
+      return li;
+    }));
+    if (active >= 0) el.input.setAttribute("aria-activedescendant", "opt" + matches[active]);
+  }
+  function closeSuggest() { el.suggest.hidden = true; el.input.setAttribute("aria-expanded", "false"); el.input.removeAttribute("aria-activedescendant"); active = -1; }
+  function pick(id) { chosen = id; el.input.value = P(id).name; closeSuggest(); el.btnGuess.disabled = false; el.input.focus(); }
+  function resolveInput() {
+    if (chosen && P(chosen).name === el.input.value) return chosen;
+    const n = norm(el.input.value);
+    const exact = DEX.findIndex((d) => norm(d[0]) === n);
+    if (exact >= 0) return exact + 1;
+    return matches.length === 1 ? matches[0] : null;
+  }
+
+  el.input.addEventListener("input", () => {
+    chosen = null; active = -1; renderSuggest();
+    el.btnGuess.disabled = !resolveInput();
+  });
+  el.input.addEventListener("keydown", (e) => {
+    if (e.key === "ArrowDown" || e.key === "ArrowUp") {
+      if (el.suggest.hidden) renderSuggest();
+      if (!matches.length) return;
+      e.preventDefault();
+      active = (active + (e.key === "ArrowDown" ? 1 : -1) + matches.length) % matches.length;
+      renderSuggest();
+      el.suggest.children[active]?.scrollIntoView({ block: "nearest" });
+    } else if (e.key === "Enter") {
+      e.preventDefault();
+      if (!el.suggest.hidden && matches.length) return pick(matches[Math.max(0, active)]);
+      doGuess();
+    } else if (e.key === "Escape") closeSuggest();
+  });
+  el.input.addEventListener("blur", () => setTimeout(closeSuggest, 120));
+  function doGuess() {
+    const id = resolveInput();
+    if (!id) { if (el.input.value.trim()) toast("Kies een Pokémon uit de lijst"); return; }
+    el.input.value = ""; chosen = null; el.btnGuess.disabled = true; closeSuggest();
+    submit(id);
+  }
+
+  /* ---------- scanner canvas ---------- */
+  const scan = { locked: 0, flash: 0, glitch: 0, vals: new Float32Array(96) };
+  const cv = $("scan"), cx2 = cv.getContext("2d");
+  let colors = {};
+  function readColors() {
+    const cs = getComputedStyle(document.documentElement);
+    for (const k of ["bg", "bg-2", "line", "line-soft", "fg", "dim", "signal", "type"]) colors[k] = cs.getPropertyValue("--" + k).trim();
+  }
+  matchMedia("(prefers-color-scheme: dark)").addEventListener("change", readColors);
+  new MutationObserver(readColors).observe(document.documentElement, { attributes: true, attributeFilter: ["style", "data-theme"] });
+  readColors();
+  function glitch() { scan.glitch = performance.now(); el.scanner.classList.remove("shake"); void el.scanner.offsetWidth; el.scanner.classList.add("shake"); }
+  const freq = new Uint8Array(analyser.frequencyBinCount), wave = new Uint8Array(analyser.fftSize);
+
+  function draw(now) {
+    requestAnimationFrame(draw);
+    const r = cv.getBoundingClientRect(), dpr = Math.min(devicePixelRatio || 1, 2);
+    const W = Math.round(r.width * dpr);
+    if (!W) return;
+    if (cv.width !== W) cv.width = cv.height = W;
+    const x = cx2, c = W / 2, R = c * 0.985;
+    x.clearRect(0, 0, W, W);
+    const accent = scan.locked ? colors.type : colors.signal;
+
+    // disc
+    const g = x.createRadialGradient(c, c, 0, c, c, R);
+    g.addColorStop(0, colors["bg-2"]); g.addColorStop(1, colors.bg);
+    x.fillStyle = g; x.beginPath(); x.arc(c, c, R, 0, Math.PI * 2); x.fill();
+
+    // rings
+    x.lineWidth = 1 * dpr;
+    x.strokeStyle = colors.line;
+    for (const f of [0.93, 0.68, 0.43]) { x.beginPath(); x.arc(c, c, R * f, 0, Math.PI * 2); x.stroke(); }
+    x.strokeStyle = colors["line-soft"];
+    x.beginPath(); x.moveTo(c - R * .93, c); x.lineTo(c + R * .93, c); x.moveTo(c, c - R * .93); x.lineTo(c, c + R * .93); x.stroke();
+
+    // ticks
+    for (let i = 0; i < 120; i++) {
+      const a = i / 120 * Math.PI * 2, long = i % 10 === 0;
+      x.strokeStyle = long ? accent : colors.line; x.globalAlpha = long ? .8 : 1;
+      x.beginPath(); x.moveTo(c + Math.cos(a) * R * (long ? .955 : .965), c + Math.sin(a) * R * (long ? .955 : .965));
+      x.lineTo(c + Math.cos(a) * R * .99, c + Math.sin(a) * R * .99); x.stroke();
+    }
+    x.globalAlpha = 1;
+
+    // sweep (idle search beam)
+    if (!scan.locked && !reduced) {
+      const ang = now / 1000 * 0.9;
+      for (let k = 0; k < 28; k++) {
+        x.fillStyle = colors.signal; x.globalAlpha = 0.16 * (1 - k / 28);
+        x.beginPath(); x.moveTo(c, c); x.arc(c, c, R * .93, ang - (k + 1) * 0.022, ang - k * 0.022); x.closePath(); x.fill();
+      }
+      x.globalAlpha = .75; x.strokeStyle = colors.signal; x.lineWidth = 1.5 * dpr;
+      x.beginPath(); x.moveTo(c, c); x.lineTo(c + Math.cos(ang) * R * .93, c + Math.sin(ang) * R * .93); x.stroke();
+      x.globalAlpha = 1;
+    }
+
+    // spectrum ring
+    const playing = !!current;
+    if (playing) analyser.getByteFrequencyData(freq);
+    const n = scan.vals.length;
+    for (let i = 0; i < n; i++) {
+      const bin = Math.floor(2 + Math.pow(i / n, 1.4) * 150);
+      const target = playing ? freq[bin] / 255 : 0;
+      scan.vals[i] = target > scan.vals[i] ? target : scan.vals[i] * 0.9;
+    }
+    const r0 = R * (scan.locked ? .72 : .45), span = R * (scan.locked ? .2 : .44);
+    x.lineCap = "round"; x.lineWidth = Math.max(2, R * .018);
+    for (let i = 0; i < n * 2; i++) {
+      const v = scan.vals[i < n ? i : n * 2 - 1 - i];
+      if (v < 0.02) continue;
+      const a = -Math.PI / 2 + i / (n * 2) * Math.PI * 2;
+      x.strokeStyle = accent; x.globalAlpha = .3 + v * .7;
+      x.beginPath(); x.moveTo(c + Math.cos(a) * r0, c + Math.sin(a) * r0);
+      x.lineTo(c + Math.cos(a) * (r0 + 3 + v * span), c + Math.sin(a) * (r0 + 3 + v * span)); x.stroke();
+    }
+    x.globalAlpha = 1;
+
+    // waveform loop
+    if (playing && !scan.locked) {
+      analyser.getByteTimeDomainData(wave);
+      x.strokeStyle = colors.fg; x.globalAlpha = .55; x.lineWidth = 1.2 * dpr;
+      x.beginPath();
+      for (let i = 0; i <= 128; i++) {
+        const v = (wave[Math.floor(i / 128 * (wave.length - 1))] - 128) / 128;
+        const a = i / 128 * Math.PI * 2, rr = R * .34 + v * R * .12;
+        i ? x.lineTo(c + Math.cos(a) * rr, c + Math.sin(a) * rr) : x.moveTo(c + Math.cos(a) * rr, c + Math.sin(a) * rr);
+      }
+      x.stroke(); x.globalAlpha = 1;
+    }
+
+    // glitch noise after a wrong guess
+    const ge = now - scan.glitch;
+    if (ge < 380) {
+      const k = 1 - ge / 380;
+      for (let i = 0; i < 14; i++) {
+        x.fillStyle = i % 3 ? colors.fg : colors.signal; x.globalAlpha = Math.random() * .35 * k;
+        x.fillRect(0, Math.random() * W, W, Math.random() * 6 * dpr);
+      }
+      x.globalAlpha = 1;
+    }
+    // lock flash
+    const fe = now - scan.flash;
+    if (fe < 600) { x.fillStyle = colors.type; x.globalAlpha = .35 * (1 - fe / 600); x.beginPath(); x.arc(c, c, R, 0, Math.PI * 2); x.fill(); x.globalAlpha = 1; }
+
+    // clip to disc edge
+    x.globalCompositeOperation = "destination-in";
+    x.beginPath(); x.arc(c, c, R, 0, Math.PI * 2); x.fill();
+    x.globalCompositeOperation = "source-over";
+  }
+  requestAnimationFrame(draw);
+
+  /* ---------- particles ---------- */
+  const fx = $("fx"), fctx = fx.getContext("2d");
+  function burst(cols) {
+    if (reduced) return;
+    const dpr = Math.min(devicePixelRatio || 1, 2);
+    fx.width = innerWidth * dpr; fx.height = innerHeight * dpr;
+    const r = el.scanner.getBoundingClientRect(), ox = (r.left + r.width / 2) * dpr, oy = (r.top + r.height / 2) * dpr;
+    const ps = Array.from({ length: 90 }, () => {
+      const a = Math.random() * Math.PI * 2, s = (3 + Math.random() * 9) * dpr;
+      return { x: ox, y: oy, vx: Math.cos(a) * s, vy: Math.sin(a) * s - 3 * dpr, s: (2 + Math.random() * 4) * dpr, c: cols[Math.floor(Math.random() * cols.length)], life: 1 };
+    });
+    const t0 = performance.now();
+    (function tick(t) {
+      const e = (t - t0) / 1400;
+      fctx.clearRect(0, 0, fx.width, fx.height);
+      if (e >= 1) return;
+      for (const p of ps) {
+        p.vx *= .97; p.vy = p.vy * .97 + .22 * dpr; p.x += p.vx; p.y += p.vy;
+        fctx.globalAlpha = 1 - e; fctx.fillStyle = p.c;
+        fctx.beginPath(); fctx.arc(p.x, p.y, p.s * (1 - e * .5), 0, Math.PI * 2); fctx.fill();
+      }
+      requestAnimationFrame(tick);
+    })(t0);
+  }
+
+  /* ---------- misc ---------- */
+  function esc(s) { return s.replace(/[&<>"]/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c])); }
+  function vibrate(p) { try { navigator.vibrate && navigator.vibrate(p); } catch {} }
+  let toastT;
+  function toast(msg) { const t = $("toast"); t.textContent = msg; t.classList.add("on"); clearTimeout(toastT); toastT = setTimeout(() => t.classList.remove("on"), 1800); }
+  function openDialog(id) { const d = $(id); if (!d.open) d.showModal(); }
+  document.querySelectorAll("dialog").forEach((d) => {
+    d.addEventListener("click", (e) => { if (e.target === d || e.target.closest("[data-close]")) d.close(); });
+  });
+  $("dlgHelp").addEventListener("close", () => store.set("seen", true));
+
+  function tickCountdown() {
+    const now = new Date(), next = new Date(now.getFullYear(), now.getMonth(), now.getDate() + 1);
+    const s = Math.max(0, Math.floor((next - now) / 1000));
+    $("countdown").textContent = [s / 3600, (s % 3600) / 60, s % 60].map((v) => String(Math.floor(v)).padStart(2, "0")).join(":");
+    if (G && G.kind === "daily" && G.day !== today()) start();
+  }
+  setInterval(tickCountdown, 1000);
+
+  /* ---------- stats ---------- */
+  let statMode = "open";
+  function renderStats() {
+    const hist = store.get(`hist:${statMode}`, {});
+    const days = Object.keys(hist).map(Number).sort((a, b) => a - b);
+    const wins = days.filter((d) => hist[d] > 0);
+    let streak = 0, d = today();
+    if (hist[d] === undefined) d--;
+    while (hist[d] > 0) { streak++; d--; }
+    let best = 0, run = 0, prev = null;
+    for (const day of days) { if (hist[day] > 0 && (prev === null || day === prev + 1) && run > 0) run++; else run = hist[day] > 0 ? 1 : 0; best = Math.max(best, run); prev = day; }
+    $("statNums").innerHTML = [
+      [days.length, "Gespeeld"], [days.length ? Math.round(wins.length / days.length * 100) : 0, "Win %"], [streak, "Streak"], [best, "Beste"],
+    ].map(([v, l]) => `<div><b>${v}</b><span>${l}</span></div>`).join("");
+    const counts = [1, 2, 3, 4, 5, 6, 0].map((k) => days.filter((d) => hist[d] === k).length);
+    const mx = Math.max(1, ...counts), t = hist[today()];
+    $("statDist").innerHTML = counts.map((cnt, i) => {
+      const k = i === 6 ? 0 : i + 1;
+      return `<div class="r"><span>${k || "X"}</span><div class="b${t === k ? " today" : ""}" style="width:${Math.max(8, cnt / mx * 100)}%">${cnt}</div></div>`;
+    }).join("");
+    $("statNote").textContent = days.length ? "Statistieken worden alleen in deze browser bewaard." : "Nog niets gespeeld in deze modus. Speel de cry van vandaag om te beginnen.";
+    $("statTabs").querySelectorAll("button").forEach((b) => b.setAttribute("aria-selected", b.dataset.mode === statMode));
+  }
+  $("statTabs").addEventListener("click", (e) => { const b = e.target.closest("button"); if (!b) return; statMode = b.dataset.mode; renderStats(); });
+
+  /* ---------- wiring ---------- */
+  el.play.onclick = playCurrent;
+  el.btnSkip.onclick = skip;
+  el.btnMore.onclick = skip;
+  el.btnGuess.onclick = doGuess;
+  $("seg").addEventListener("click", (e) => {
+    const b = e.target.closest("button"); if (!b || b.dataset.mode === mode) return;
+    mode = b.dataset.mode; store.set("mode", mode); start();
+  });
+  $("btnKind").onclick = () => { kind = kind === "daily" ? "training" : "daily"; start(); };
+  $("btnNext").onclick = start;
+  $("btnAgain").onclick = start;
+  $("btnHelp").onclick = () => openDialog("dlgHelp");
+  $("btnStats").onclick = () => { statMode = mode; renderStats(); openDialog("dlgStats"); };
+  $("btnShare").onclick = () => copy(shareText());
+  $("btnCopy2").onclick = () => copy($("shareText").textContent);
+  $("btnCard").onclick = () => clips.c && shareCard();
+  document.addEventListener("keydown", (e) => {
+    if (e.target.closest("input, textarea, dialog") || e.metaKey || e.ctrlKey || e.altKey) return;
+    if (e.key === " " && !e.target.closest("button")) { e.preventDefault(); if (!el.play.disabled) playCurrent(); }
+    if (G && G.mode === "mc" && !G.done && /^[1-4]$/.test(e.key)) { const b = el.cards.children[+e.key - 1]; if (b && !b.disabled) b.click(); }
+  });
+
+  /* ---------- boot ---------- */
+  fetch("data/dex.json").then((r) => r.json()).then((d) => {
+    DEX = d;
+    start();
+    tickCountdown();
+    if (!store.get("seen", false)) openDialog("dlgHelp");
+  }).catch((e) => {
+    el.roDex.textContent = "● Geen signaal";
+    setStatus("De Pokédex kon niet laden. Herlaad de pagina.");
+    console.error(e);
+  });
+})();
+</script>
