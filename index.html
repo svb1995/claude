@@ -162,6 +162,19 @@ section.block{padding-block:clamp(88px,11vw,150px)}
 footer .wrap{display:flex;flex-wrap:wrap;justify-content:space-between;gap:12px;padding-block:28px;border-top:1px solid var(--line);color:var(--muted);font-size:14px}
 footer .clock{font-family:var(--mono);font-variant-numeric:tabular-nums}
 
+/* portrait */
+.photo{position:relative;width:100%;max-width:340px;aspect-ratio:1/1;border-radius:28px;padding:3px;background:conic-gradient(from var(--ang,0deg),var(--signal),var(--spark),var(--signal));animation:spin 8s linear infinite;margin-block:4px 10px}
+@property --ang{syntax:"<angle>";initial-value:0deg;inherits:false}
+@keyframes spin{to{--ang:360deg}}
+.photo .frame{width:100%;height:100%;border-radius:25px;overflow:hidden;background:var(--bg-2)}
+.photo img{display:block;width:100%;height:100%;max-width:100%;object-fit:cover;object-position:50% 30%;transform:scale(1.04);transition:transform 1.2s var(--ease),filter 1.2s var(--ease);filter:saturate(.9)}
+.photo:hover img{transform:scale(1.1);filter:saturate(1.05)}
+.photo .badge{position:absolute;left:18px;bottom:18px;display:flex;align-items:center;gap:8px;padding:8px 14px;border-radius:999px;background:color-mix(in srgb, var(--bg) 78%, transparent);backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);font-family:var(--mono);font-size:12px;letter-spacing:.06em;color:var(--fg)}
+.photo .badge i{width:8px;height:8px;border-radius:50%;background:#3DDC84;box-shadow:0 0 0 3px color-mix(in srgb, #3DDC84 30%, transparent)}
+.photo .orb{position:absolute;width:14px;height:14px;border-radius:50%;background:var(--spark);top:-7px;right:22%;box-shadow:0 0 18px var(--spark);animation:bob 3.2s ease-in-out infinite}
+.photo .orb.b{background:var(--signal);box-shadow:0 0 18px var(--signal);top:auto;bottom:24%;right:-7px;width:11px;height:11px;animation-delay:-1.4s}
+@keyframes bob{50%{transform:translateY(-8px)}}
+
 /* reveal */
 .js .rv{transition:opacity .9s var(--ease),transform .9s var(--ease)}
 .js .rv:not(.in){opacity:.25;transform:translateY(34px)}
@@ -234,6 +247,11 @@ footer .clock{font-family:var(--mono);font-variant-numeric:tabular-nums}
     <div class="wrap about">
       <div class="facts rv">
         <p class="label">About</p>
+        <figure class="photo" style="margin-inline:0">
+          <div class="frame"><img src="portrait.jpg" alt="Sebastiaan van Bergen at a partner event, smiling, in a dark suit with a conference lanyard" width="400" height="400"></div>
+          <span class="orb" aria-hidden="true"></span><span class="orb b" aria-hidden="true"></span>
+          <figcaption class="badge"><i aria-hidden="true"></i>Open to new partnerships</figcaption>
+        </figure>
         <div class="fact"><span class="label">Based in</span><strong>Amsterdam, NL</strong></div>
         <div class="fact"><span class="label">Now</span><strong>Storyblok, Benelux &amp; Nordics</strong></div>
         <div class="fact"><span class="label">Education</span><strong>MSc with Distinction, Tilburg University</strong></div>
