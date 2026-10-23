@@ -2,9 +2,12 @@
 
 Who's that cry? Elke dag één Pokémon, te raden aan zijn cry: van 0,1 seconde tot het volledige geluid.
 
+- **Daily**: elke dag dezelfde cry voor iedereen. Daarna (of met "Don't know") ga je met **Next cry** direct door.
+- **Train**: eindeloos willekeurige cries, met een filter per generatie.
 - **Open**: typ zelf de naam (autocomplete). Bij stap 5 en 6 krijg je het type, de generatie en een silhouet.
-- **Keuze**: kies uit vier Pokémon uit dezelfde generatie.
-- **Training**: willekeurige Pokémon, met een filter per generatie.
+- **Choice**: kies uit vier Pokémon uit dezelfde generatie.
+
+Design: Pokédex-behuizing met een Game Boy-LCD die bij de reveal de kleur van het type aanneemt.
 
 Open `index.html` via een lokale server (bijv. `python3 -m http.server`), want de data wordt met `fetch` geladen.
 
